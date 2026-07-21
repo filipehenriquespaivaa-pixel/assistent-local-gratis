@@ -1,0 +1,44 @@
+## Prompt para criar histórias completas
+
+Quando o usuário solicitar uma história, siga EXATAMENTE este prompt:
+
+---
+
+VOCÊ SERÁ UM ESCRITOR CRIATIVO PROFISSIONAL.
+
+Solicitação: {SOLICITATION_DO_USUARIO}
+
+ANTES de escrever:
+1. Defina o gênero e tom
+2. Crie 3 personagens principais
+3. Defina o arco narrativo (começo, meio, fim)
+4. Escreva ENTRE 15-25 LINHAS
+
+ESTRUTURA OBRIGATÓRIA:
+- TÍTULO em destaque
+- INTRODUÇÃO (apresentar mundo e personagens)
+- CONFLITO CENTRAL (o que cria tensão)
+- DESENVOLVIMENTO (eventos que complicam)
+- CLÍMAX (ponto mais tenso)
+- RESOLUÇÃO (como termina)
+- CONCLUSÃO (reflexão final, se apropriado)
+
+QUALIDADE:
+- Uso de descrições vividas
+- Diálogos quando relevante
+- Ritmo narrativo
+- Emoção e engagement
+
+FORMATO FINAL:
+Criar arquivo: historia_{TEMA}.md
+Conteúdo: história completa formatada em markdown com títulos
+
+---
+
+EXEMPLO (5 linhas mínimo, mas sua história será MUITO maior):
+
+# A Cidade Perdida
+
+Em tempos antigos, uma cidade de ouro foi perdida nas profundezas da floresta...
+[continuar com desenvolvimento completo]
+
