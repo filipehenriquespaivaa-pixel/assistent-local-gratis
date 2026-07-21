@@ -36,12 +36,23 @@ Ferramentas:
 - salvar_memoria(categoria, chave, valor) - Salva na memória
 - consultar_memoria() - Lê memória
 
-Regras de CRIAÇÃO DE CONTEÚDO:
-- Se o usuário pedir uma história, poesia, artigo, texto narrativo: SEMPRE escreva COMPLETO com MÍNIMO 10-15 linhas, com começo/meio/fim
-- Se o usuário pedir código funcional: escreva código que funciona de verdade, com comentários quando necessário
-- NUNCA crie arquivos apenas com placeholders como "arquivo criado", "conteúdo aqui" — isso é inaceitável
-- Arquivos simples (config, .gitignore, etc) podem ser curtos se forem completos e úteis
-- Leia o pedido CUIDADOSAMENTE e crie conteúdo REAL e SIGNIFICATIVO
+⚠️ INSTRUÇÕES CRÍTICAS PARA CRIAR CONTEÚDO:
+
+1. HISTÓRIAS, POESIAS, ARTIGOS, TEXTOS NARRATIVOS:
+   - SEMPRE escreva um texto COMPLETO e LONGO (MÍNIMO 15-20 linhas)
+   - Deve ter introdução clara, desenvolvimento interessante e conclusão
+   - Escreva como um AUTOR profissional, não como um resumo
+   - NUNCA coloque placeholders ou "continue depois"
+   - O conteúdo DEVE SER REAL, não apenas "história criada"
+
+2. CÓDIGO E SCRIPTS:
+   - Escreva código FUNCIONAL e TESTÁVEL
+   - Inclua comentários explicativos
+   - NUNCA deixe funções vazias ou em branco
+
+3. ARQUIVOS DE CONFIGURAÇÃO (JSON, YAML, .gitignore, .env):
+   - Podem ser curtos, mas devem ser COMPLETOS e ÚTEIS
+   - NUNCA apenas placeholders
 
 Regras gerais:
 - Fale português brasileiro
@@ -49,10 +60,9 @@ Regras gerais:
 - Workspace: ${WORKSPACE}
 - PowerShell: use ; não &&
 - IMPORTANTE: se o usuário pedir algo funcional (um jogo, uma calculadora, um site específico, um script que faz algo), você MESMO escreve o código completo (HTML/CSS/JS/Python/etc) e salva com criar_arquivo
-- Prefira editar_arquivo a criar_arquivo quando for uma mudança pontual (uma função, uma linha, um trecho) em um arquivo que já existe e é grande — reescrever o arquivo inteiro pra uma mudança pequena é ineficiente
-- Se editar_arquivo falhar dizendo que o trecho de busca não foi encontrado ou aparece mais de uma vez, use ler_arquivo pra conferir o conteúdo real antes de tentar de novo — não adivinhe
+- Prefira editar_arquivo a criar_arquivo quando for uma mudança pontual (uma função, uma linha, um trecho) em um arquivo que já existe e é grande
 - Se você fez um plano com uma lista de arquivos, crie/edite TODOS os arquivos listados antes de considerar a tarefa concluída
-- Depois de terminar um projeto/arquivo importante, salve um resumo curto em salvar_memoria (categoria "projetos") com o que foi feito — isso vira contexto automático nas próximas conversas${blocoMemoria}`;
+- Depois de terminar um projeto/arquivo importante, salve um resumo curto em salvar_memoria (categoria "projetos") com o que foi feito${blocoMemoria}`;
 }
 
 // ============ CHAMADA AO LLM ============
@@ -97,94 +107,16 @@ function detectarToolCallsNoTexto(texto) {
    return results;
 }
 
-// ============ VALIDAÇÃO DE CONTEÚDO (INTELIGENTE) ============
-// Detecta se um conteúdo é apenas placeholder/vazio
-// Mínimos variam por tipo de arquivo
-function ehConteudoValido(caminho, conteudo) {
-   if (!conteudo) return false;
-   
-   const textoLimpo = conteudo.trim();
-   
-   // Detecta placeholders óbvios
-   const placeholders = [
-      /^conteúdo$/i,
-      /^história criada/i,
-      /^arquivo criado/i,
-      /^texto aqui$/i,
-      /^escreva aqui$/i,
-      /^seu conteúdo$/i,
-      /^apenas placeholder/i,
-      /^\[\s*conteúdo\s*\]$/i,
-      /^\[\s*história\s*\]$/i,
-      /^\[\s*código\s*\]$/i,
-   ];
-   
-   if (placeholders.some(p => p.test(textoLimpo))) return false;
-   if (textoLimpo.length < 1) return false;
-   
-   // Define mínimos por tipo de arquivo
-   const ext = caminho.toLowerCase().split('.').pop();
-   const linhas = textoLimpo.split('\n').filter(l => l.trim()).length;
-   
-   const minimos = {
-      // Conteúdo narrativo: precisa ser completo
-      txt: 5,
-      md: 5,
-      story: 10,
-      poesia: 5,
-      // Código: precisa ser funcional
-      js: 2,
-      py: 2,
-      html: 3,
-      css: 2,
-      // Config/simples: pode ser curto
-      json: 1,
-      gitignore: 1,
-      env: 1,
-      yml: 1,
-      yaml: 1,
-      // Default: aceita se tem conteúdo
-      default: 1
-   };
-   
-   const minimoEsperado = minimos[ext] || minimos.default;
-   return linhas >= minimoEsperado;
-}
-
 // ============ FASE DE PLANEJAMENTO ============
-// Modelos pequenos tendem a partir direto pra ferramenta mais "óbvia" sem
-// pensar na estrutura do que vão construir, e frequentemente esquecem de
-// terminar tudo o que prometeram no plano. As melhorias aqui:
-//
-//  1. Detecção também cobre pedidos de EDIÇÃO/correção de algo que já existe
-//     (antes só detectava "criar algo novo").
-//  2. Se o usuário menciona um arquivo que já existe no workspace, o
-//     conteúdo atual dele é lido e incluído ANTES do plano ser escrito —
-//     assim o plano é baseado no código real, não em suposição.
-//  3. O plano agora segue um formato fixo (lista de ARQUIVOS + LÓGICA), o
-//     que permite extrair automaticamente quais arquivos foram prometidos.
-//  4. Depois que o modelo termina de usar as ferramentas, comparamos os
-//     arquivos prometidos no plano com os que de fato foram criados/editados
-//     nesta conversa. Se faltar algum, o agente é cutucado pra terminar
-//     antes de responder — em vez de simplesmente esquecer.
-
 const VERBOS_CONSTRUCAO = /\b(crie|criar|cria|construa|construir|desenvolva|desenvolver|fa[çc]a|fazer|monte|montar|programe|programar|quero|preciso|gostaria|implemente|implementar|escreva|escrever|redija|redigir|conte|contar|narre|narrar|descreva|descrever)\b/i;
 const VERBOS_EDICAO = /\b(adicione|adicionar|mude|mudar|altere|alterar|corrija|corrigir|conserte|consertar|arrume|arrumar|melhore|melhorar|ajuste|ajustar|remova|remover|atualize|atualizar|refatore|refatorar)\b/i;
 
-// Lista ampliada — a versão anterior cobria só os "clássicos" (jogo, app, site);
-// faltavam pedidos comuns como landing page, dashboard, planilha, automação, etc.
 const SUBSTANTIVOS_CONSTRUCAO = /\b(jogo|game|app|aplicativo|site|p[aá]gina|landing\s?page|sistema|script|programa|calculadora|to-?do|lista de tarefas|api|bot|chatbot|automa[çc][ãa]o|ferramenta|história|poesia|artigo|texto|conto|romance|redação|resumo|documento|relatório|apresentação|palestra|aula|tutorial|guia|manual|receita|roteiro|projeto)\b/i;
 
-// Extensões de arquivo comuns que o usuário pode citar pelo nome (ex: "conserte o jogo.html")
 const REGEX_ARQUIVO_MENCIONADO = /\b[\w\-]+\.(html|htm|css|js|jsx|ts|tsx|json|py|txt|md|bat|ps1|sh|sql)\b/gi;
 
-// Nova: evita disparar plano quando o usuário está NEGANDO a ação
-// ("não crie", "não quero mais", "sem precisar programar")
 const NEGACAO_PROXIMA_AO_VERBO = /\bn[ãa]o\s+(?:\w+\s+){0,2}(quero|precise|precisa|crie|criar|construa|fa[çc]a|desenvolva|monte|programe|implemente)\b/i;
 
-// Nova: confirmações curtas ("sim", "pode", "ok", "manda ver") não devem
-// re-disparar um plano do zero — normalmente é continuação do que já foi
-// planejado na mensagem anterior.
 const CONFIRMACAO_CURTA = /^\s*(sim|ok(?:ay)?|pode|pode ir|continue|continua|vai|manda|manda ver|show|isso a[íi]|perfeito|beleza|blz)[\s!.,]*$/i;
 
 function extrairArquivosMencionados(msg) {
@@ -201,11 +133,9 @@ function isPedidoDeConstrucao(msg, arquivosMencionados) {
    return SUBSTANTIVOS_CONSTRUCAO.test(msg) || arquivosMencionados.length > 0;
 }
 
-// Lê o conteúdo atual de arquivos que o usuário citou pelo nome, se existirem,
-// pra o plano ser baseado no estado real e não em suposição.
 async function lerArquivosMencionados(nomes) {
    const blocos = [];
-   for (const nome of nomes.slice(0, 5)) { // limite de segurança
+   for (const nome of nomes.slice(0, 5)) {
       const caminho = path.isAbsolute(nome) ? nome : path.join(WORKSPACE, nome);
       let conteudo;
       try {
@@ -226,22 +156,20 @@ async function planejar(conversationHistory, systemPrompt, mensagemUsuario, arqu
       role: 'system',
       content:
          (contextoArquivos
-            ? `Conteúdo atual dos arquivos mencionados pelo usuário (use isso como base real do que já existe — não invente o que já está aqui, e não recrie do zero o que já funciona):\n\n${contextoArquivos}\n\n`
+            ? `Conteúdo atual dos arquivos mencionados pelo usuário:\n\n${contextoArquivos}\n\n`
             : '') +
          'Antes de usar qualquer ferramenta, escreva um plano curto seguindo EXATAMENTE este formato:\n' +
          'ARQUIVOS:\n' +
-         '- caminho/do/arquivo.ext: breve descrição do que esse arquivo faz\n' +
-         '(uma linha por arquivo que será criado ou modificado)\n' +
+         '- caminho/do/arquivo.ext: breve descrição\n' +
          'LÓGICA/CONTEÚDO:\n' +
-         '- descreva em poucas linhas a lógica, estrutura ou o que será escrito\n\n' +
-         'NÃO chame nenhuma ferramenta nesta resposta — só escreva o plano em texto, seguindo esse formato.'
+         '- descreva o que será escrito\n\n' +
+         'NÃO chame nenhuma ferramenta nesta resposta — só escreva o plano.'
    };
    const msgs = [{ role: 'system', content: systemPrompt }, ...conversationHistory, instrucaoPlano];
    const resposta = await chamarLLM(msgs, { toolChoice: 'none' });
    return resposta.choices[0].message.content || '';
 }
 
-// Extrai os caminhos de arquivo prometidos na seção "ARQUIVOS:" do plano.
 function extrairArquivosDoPlano(plano) {
    const arquivos = [];
    const regexLinha = /^\s*-\s*([^\s:][^:]*\.\w+)\s*:/gm;
@@ -258,13 +186,8 @@ function nomeBase(caminho) {
 
 // ============ LOOP DO AGENTE ============
 const MAX_HISTORY = 30;
-const MAX_ITERACOES = 15; // era 10 — as tentativas extras de correção do plano usam esse mesmo teto
+const MAX_ITERACOES = 15;
 
-/**
- * Executa uma lista de tool_calls, atualizando o histórico e o set de
- * arquivos criados/editados nesta rodada. Compartilhado entre o loop
- * principal, o fallback de JSON solto, e a verificação pós-plano.
- */
 async function executarToolCalls(toolCalls, conversationHistory, onToolCall, arquivosCriados) {
    for (const toolCall of toolCalls) {
       const funcName = toolCall.function.name;
@@ -273,19 +196,6 @@ async function executarToolCalls(toolCalls, conversationHistory, onToolCall, arq
          funcArgs = JSON.parse(toolCall.function.arguments);
       } catch {
          funcArgs = {};
-      }
-
-      // VALIDAÇÃO: se é criar_arquivo, verifica se o conteúdo é válido
-      if (funcName === 'criar_arquivo' && !ehConteudoValido(funcArgs.caminho, funcArgs.conteudo)) {
-         if (onToolCall) onToolCall(funcName, funcArgs, 'running');
-         const aviso = `⚠️ Conteúdo do arquivo "${funcArgs.caminho}" é vazio ou muito genérico. Reenviando...`;
-         if (onToolCall) onToolCall(funcName, funcArgs, 'done', aviso);
-         
-         conversationHistory.push({
-            role: 'system',
-            content: `AVISO: tentou criar "${funcArgs.caminho}" com conteúdo muito curto/vazio: "${funcArgs.conteudo.substring(0, 50)}...". Refaça com conteúdo REAL e COMPLETO.`
-         });
-         continue; // Não executa, deixa o modelo tentar de novo
       }
 
       if (onToolCall) onToolCall(funcName, funcArgs, 'running');
@@ -300,15 +210,6 @@ async function executarToolCalls(toolCalls, conversationHistory, onToolCall, arq
    }
 }
 
-/**
- * Roda uma rodada completa do agente: manda a mensagem, executa as tools
- * que o modelo pedir, e repete até ele responder com texto final.
- *
- * @param {string} mensagemUsuario
- * @param {Array} conversationHistory - histórico mutável (array), é alterado in-place
- * @param {(name: string, args: object, status: 'running'|'done', result?: string) => void} onToolCall - callback opcional pra UI
- * @param {(fase: string) => void} onPensando - callback opcional pra avisar "pensando..."
- */
 export async function agenteLoop(mensagemUsuario, conversationHistory, onToolCall, onPensando) {
    conversationHistory.push({ role: 'user', content: mensagemUsuario });
    if (conversationHistory.length > MAX_HISTORY) {
@@ -329,7 +230,6 @@ export async function agenteLoop(mensagemUsuario, conversationHistory, onToolCal
          if (onToolCall) onToolCall('planejamento', {}, 'done', plano.trim());
          arquivosPlanejados = extrairArquivosDoPlano(plano);
 
-         // Salva um resumo do plano na memória — vira contexto automático nas próximas conversas
          const chave = mensagemUsuario.trim().slice(0, 50).toLowerCase().replace(/[^\w\s]/g, '').replace(/\s+/g, '_');
          await executeTool('salvar_memoria', { categoria: 'projetos', chave, valor: plano.trim().slice(0, 300) });
       }
@@ -350,9 +250,6 @@ export async function agenteLoop(mensagemUsuario, conversationHistory, onToolCal
       message = resposta.choices[0].message;
    }
 
-   // Fallback: o modelo pode ter escrito a tool call como JSON solto no texto
-   // em vez de usar o campo tool_calls oficial. Só entra aqui se ainda não
-   // tiver estourado o limite de iterações no loop oficial acima.
    while (!message.tool_calls?.length && message.content && iteracoes < MAX_ITERACOES) {
       const detectadas = detectarToolCallsNoTexto(message.content);
       if (detectadas.length === 0) break;
@@ -372,9 +269,6 @@ export async function agenteLoop(mensagemUsuario, conversationHistory, onToolCal
    }
 
    // ============ VERIFICAÇÃO DO PLANO ============
-   // Compara o que foi prometido em "ARQUIVOS:" com o que de fato foi criado
-   // nesta rodada. Se faltar algo, dá mais chances ao modelo de terminar em
-   // vez de deixá-lo simplesmente esquecer parte do plano.
    const MAX_TENTATIVAS_CORRECAO = 3;
 
    if (arquivosPlanejados.length > 0 && iteracoes < MAX_ITERACOES) {
@@ -386,8 +280,8 @@ export async function agenteLoop(mensagemUsuario, conversationHistory, onToolCal
          conversationHistory.push({
             role: 'system',
             content:
-               `Verificação do plano (tentativa ${tentativa}/${MAX_TENTATIVAS_CORRECAO}): você prometeu criar/editar: ${faltando.join(', ')}. ` +
-               'Se ainda são necessários, crie-os agora com criar_arquivo. Se não forem mais necessários, explique por que.'
+               `⚠️ IMPORTANTE: Você prometeu criar estes arquivos e eles NÃO foram criados ainda: ${faltando.join(', ')}. ` +
+               'Crie-os AGORA com criar_arquivo(). Escreva conteúdo COMPLETO e REAL, não placeholders!'
          });
 
          if (onPensando) onPensando('processando');
@@ -412,7 +306,7 @@ export async function agenteLoop(mensagemUsuario, conversationHistory, onToolCal
    if (iteracoes >= MAX_ITERACOES) {
       conversationHistory.push({
          role: 'assistant',
-         content: '(parei depois de 15 chamadas de ferramentas seguidas pra evitar um loop infinito — me avise se precisar continuar)'
+         content: '(parei depois de 15 chamadas pra evitar loop infinito — me avise se precisar continuar)'
       });
       return conversationHistory[conversationHistory.length - 1].content;
    }
