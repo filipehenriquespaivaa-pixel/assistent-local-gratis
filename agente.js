@@ -36,12 +36,12 @@ Ferramentas:
 - salvar_memoria(categoria, chave, valor) - Salva na memória
 - consultar_memoria() - Lê memória
 
-Regras de CRIAÇÃO DE CONTEÚDO (CRÍTICO):
-- Se o usuário pedir uma história, poesia, artigo, texto, ou qualquer conteúdo escrito: SEMPRE escreva COMPLETO com MÍNIMO 15-20 linhas, com introdução, desenvolvimento e conclusão
-- Se o usuário pedir código: escreva funcional com comentários, mínimo 10 linhas
-- NUNCA crie arquivos apenas com placeholders como "arquivo criado", "conteúdo aqui" ou data — isso é inaceitável
-- Leia o pedido CUIDADOSAMENTE e crie conteúdo REAL, SIGNIFICATIVO e COMPLETO
-- Se não tiver certeza, escreva mais em vez de menos
+Regras de CRIAÇÃO DE CONTEÚDO:
+- Se o usuário pedir uma história, poesia, artigo, texto narrativo: SEMPRE escreva COMPLETO com MÍNIMO 10-15 linhas, com começo/meio/fim
+- Se o usuário pedir código funcional: escreva código que funciona de verdade, com comentários quando necessário
+- NUNCA crie arquivos apenas com placeholders como "arquivo criado", "conteúdo aqui" — isso é inaceitável
+- Arquivos simples (config, .gitignore, etc) podem ser curtos se forem completos e úteis
+- Leia o pedido CUIDADOSAMENTE e crie conteúdo REAL e SIGNIFICATIVO
 
 Regras gerais:
 - Fale português brasileiro
@@ -97,29 +97,58 @@ function detectarToolCallsNoTexto(texto) {
    return results;
 }
 
-// ============ VALIDAÇÃO DE CONTEÚDO ============
+// ============ VALIDAÇÃO DE CONTEÚDO (INTELIGENTE) ============
 // Detecta se um conteúdo é apenas placeholder/vazio
-function ehConteudoValido(conteudo) {
-   if (!conteudo || conteudo.trim().length < 3) return false;
-   
-   const placeholders = [
-      /^conteúdo/i,
-      /^história criada/i,
-      /^arquivo criado/i,
-      /^texto aqui/i,
-      /^escreva aqui/i,
-      /^seu conteúdo/i,
-      /apenas placeholder/i,
-      /\[\s*conteúdo/i,
-      /\[\s*história/i,
-   ];
+// Mínimos variam por tipo de arquivo
+function ehConteudoValido(caminho, conteudo) {
+   if (!conteudo) return false;
    
    const textoLimpo = conteudo.trim();
-   if (placeholders.some(p => p.test(textoLimpo))) return false;
    
-   // Verifica se tem múltiplas linhas ou é significativo
-   const linhas = textoLimpo.split('\n').filter(l => l.trim());
-   return linhas.length >= 3; // Mínimo 3 linhas
+   // Detecta placeholders óbvios
+   const placeholders = [
+      /^conteúdo$/i,
+      /^história criada/i,
+      /^arquivo criado/i,
+      /^texto aqui$/i,
+      /^escreva aqui$/i,
+      /^seu conteúdo$/i,
+      /^apenas placeholder/i,
+      /^\[\s*conteúdo\s*\]$/i,
+      /^\[\s*história\s*\]$/i,
+      /^\[\s*código\s*\]$/i,
+   ];
+   
+   if (placeholders.some(p => p.test(textoLimpo))) return false;
+   if (textoLimpo.length < 1) return false;
+   
+   // Define mínimos por tipo de arquivo
+   const ext = caminho.toLowerCase().split('.').pop();
+   const linhas = textoLimpo.split('\n').filter(l => l.trim()).length;
+   
+   const minimos = {
+      // Conteúdo narrativo: precisa ser completo
+      txt: 5,
+      md: 5,
+      story: 10,
+      poesia: 5,
+      // Código: precisa ser funcional
+      js: 2,
+      py: 2,
+      html: 3,
+      css: 2,
+      // Config/simples: pode ser curto
+      json: 1,
+      gitignore: 1,
+      env: 1,
+      yml: 1,
+      yaml: 1,
+      // Default: aceita se tem conteúdo
+      default: 1
+   };
+   
+   const minimoEsperado = minimos[ext] || minimos.default;
+   return linhas >= minimoEsperado;
 }
 
 // ============ FASE DE PLANEJAMENTO ============
@@ -201,12 +230,10 @@ async function planejar(conversationHistory, systemPrompt, mensagemUsuario, arqu
             : '') +
          'Antes de usar qualquer ferramenta, escreva um plano curto seguindo EXATAMENTE este formato:\n' +
          'ARQUIVOS:\n' +
-         '- caminho/do/arquivo.ext: o que esse arquivo faz e quantas linhas de conteúdo real terá\n' +
-         '(uma linha por arquivo que será criado ou modificado; se for editar um arquivo existente, diga o que muda nele)\n' +
+         '- caminho/do/arquivo.ext: breve descrição do que esse arquivo faz\n' +
+         '(uma linha por arquivo que será criado ou modificado)\n' +
          'LÓGICA/CONTEÚDO:\n' +
-         '- descreva em poucas linhas a lógica principal, estrutura do conteúdo (começo, meio, fim), ou fluxo de dados\n' +
-         '- IMPORTANTE: se for uma história, texto ou conteúdo escrito: mencione quantas linhas terá (mínimo 15-20) e o tema\n' +
-         '- se for código: mencione funções/classes principais\n\n' +
+         '- descreva em poucas linhas a lógica, estrutura ou o que será escrito\n\n' +
          'NÃO chame nenhuma ferramenta nesta resposta — só escreva o plano em texto, seguindo esse formato.'
    };
    const msgs = [{ role: 'system', content: systemPrompt }, ...conversationHistory, instrucaoPlano];
@@ -248,15 +275,15 @@ async function executarToolCalls(toolCalls, conversationHistory, onToolCall, arq
          funcArgs = {};
       }
 
-      // VALIDAÇÃO CRÍTICA: se é criar_arquivo, verifica se o conteúdo é válido
-      if (funcName === 'criar_arquivo' && !ehConteudoValido(funcArgs.conteudo)) {
+      // VALIDAÇÃO: se é criar_arquivo, verifica se o conteúdo é válido
+      if (funcName === 'criar_arquivo' && !ehConteudoValido(funcArgs.caminho, funcArgs.conteudo)) {
          if (onToolCall) onToolCall(funcName, funcArgs, 'running');
-         const aviso = `⚠️ Conteúdo do arquivo "${funcArgs.caminho}" é muito vazio/genérico. Reenviando pedido de gerar conteúdo REAL e COMPLETO...`;
+         const aviso = `⚠️ Conteúdo do arquivo "${funcArgs.caminho}" é vazio ou muito genérico. Reenviando...`;
          if (onToolCall) onToolCall(funcName, funcArgs, 'done', aviso);
          
          conversationHistory.push({
             role: 'system',
-            content: `AVISO: tentou criar o arquivo "${funcArgs.caminho}" mas o conteúdo era apenas placeholder/vazio. O conteúdo enviado foi: "${funcArgs.conteudo}". Você DEVE gerar conteúdo REAL, COMPLETO e SIGNIFICATIVO (mínimo 15-20 linhas para histórias/textos, 10+ para código). Refaça agora com conteúdo de verdade.`
+            content: `AVISO: tentou criar "${funcArgs.caminho}" com conteúdo muito curto/vazio: "${funcArgs.conteudo.substring(0, 50)}...". Refaça com conteúdo REAL e COMPLETO.`
          });
          continue; // Não executa, deixa o modelo tentar de novo
       }
@@ -348,10 +375,6 @@ export async function agenteLoop(mensagemUsuario, conversationHistory, onToolCal
    // Compara o que foi prometido em "ARQUIVOS:" com o que de fato foi criado
    // nesta rodada. Se faltar algo, dá mais chances ao modelo de terminar em
    // vez de deixá-lo simplesmente esquecer parte do plano.
-   //
-   // Antes: só UMA chance. Modelos pequenos às vezes precisam de 2-3 empurrões
-   // pra realmente terminar tudo, então isso agora repete até completar ou até
-   // um limite de tentativas — sem virar loop infinito (MAX_ITERACOES protege).
    const MAX_TENTATIVAS_CORRECAO = 3;
 
    if (arquivosPlanejados.length > 0 && iteracoes < MAX_ITERACOES) {
@@ -363,9 +386,8 @@ export async function agenteLoop(mensagemUsuario, conversationHistory, onToolCal
          conversationHistory.push({
             role: 'system',
             content:
-               `Verificação do plano (tentativa ${tentativa}/${MAX_TENTATIVAS_CORRECAO}): você prometeu criar/editar estes arquivos mas eles ainda não foram criados nesta conversa: ${faltando.join(', ')}. ` +
-               'Se ainda forem necessários, crie-os agora com criar_arquivo antes de responder. Se não forem mais necessários (ex: você mudou de abordagem), pode ignorar e explicar isso na resposta. ' +
-               'LEMBRE-SE: CONTEÚDO DEVE SER REAL E COMPLETO, NÃO PLACEHOLDERS!'
+               `Verificação do plano (tentativa ${tentativa}/${MAX_TENTATIVAS_CORRECAO}): você prometeu criar/editar: ${faltando.join(', ')}. ` +
+               'Se ainda são necessários, crie-os agora com criar_arquivo. Se não forem mais necessários, explique por que.'
          });
 
          if (onPensando) onPensando('processando');
@@ -385,21 +407,12 @@ export async function agenteLoop(mensagemUsuario, conversationHistory, onToolCal
 
          faltando = arquivosPlanejados.filter(a => !arquivosCriados.has(nomeBase(a)));
       }
-
-      if (faltando.length > 0) {
-         conversationHistory.push({
-            role: 'system',
-            content:
-               `Depois de ${MAX_TENTATIVAS_CORRECAO} tentativas ainda faltam estes arquivos do plano: ${faltando.join(', ')}. ` +
-               'Explique claramente isso na resposta final pro usuário, incluindo o motivo se souber, em vez de fingir que terminou.'
-         });
-      }
    }
 
    if (iteracoes >= MAX_ITERACOES) {
       conversationHistory.push({
          role: 'assistant',
-         content: '(parei depois de 10 chamadas de ferramentas seguidas pra evitar um loop infinito — me avise se precisar continuar)'
+         content: '(parei depois de 15 chamadas de ferramentas seguidas pra evitar um loop infinito — me avise se precisar continuar)'
       });
       return conversationHistory[conversationHistory.length - 1].content;
    }
