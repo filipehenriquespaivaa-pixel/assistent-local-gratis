@@ -34,7 +34,18 @@ export const API_TOKEN = config.apiToken || '';
 export const MODEL = config.model || 'local-model';
 // Workspace agora é configurável — antes estava fixo como "d:\ia local"
 // espalhado em vários arquivos. Se você mudar de máquina, só troca aqui (ou no config.json).
-export const WORKSPACE = config.workspace || 'd:\\ia local';
+// IMPORTANTE: Em Linux/Mac, use caminhos Unix (/home/user/workspace)
+export const WORKSPACE = config.workspace || path.join(process.cwd(), 'workspace_output');
+
+// Garante que o workspace exista
+if (!fs.existsSync(WORKSPACE)) {
+  try {
+    fs.mkdirSync(WORKSPACE, { recursive: true });
+    console.log(`[INFO] Workspace criado: ${WORKSPACE}`);
+  } catch (e) {
+    console.error(`[ERRO] Não foi possível criar o workspace ${WORKSPACE}: ${e.message}`);
+  }
+}
 
 export function getHeaders() {
   const headers = { 'Content-Type': 'application/json' };

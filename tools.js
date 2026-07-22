@@ -643,11 +643,36 @@ async function toolAcessarURL(url) {
 }
 
 function toolCriarArquivo(caminho, conteudo) {
-  const dir = path.dirname(caminho);
-  if (dir && !fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-  fs.writeFileSync(caminho, conteudo, 'utf-8');
-  return `Arquivo criado com sucesso: ${caminho}`;
+  try {
+    // Normaliza o caminho para evitar problemas com barras
+    caminho = path.normalize(caminho);
+    
+    const dir = path.dirname(caminho);
+    logger.debug(`Criando arquivo: ${caminho}, diretório: ${dir}`);
+    
+    if (dir && !fs.existsSync(dir)) {
+      logger.debug(`Diretório não existe, criando: ${dir}`);
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    
+    logger.debug(`Escrevendo conteúdo (${conteudo?.length || 0} bytes)`);
+    fs.writeFileSync(caminho, conteudo || '', 'utf-8');
+    
+    // Verifica se o arquivo foi realmente criado
+    if (fs.existsSync(caminho)) {
+      const stat = fs.statSync(caminho);
+      logger.info(`Arquivo criado com sucesso: ${caminho} (${stat.size} bytes)`);
+      return `Arquivo criado com sucesso: ${caminho} (${stat.size} bytes)`;
+    } else {
+      logger.error(`Falha ao criar arquivo: ${caminho} - arquivo não existe após escrita`);
+      return `ERRO: Falha ao criar arquivo ${caminho} - arquivo não foi encontrado após tentativa de criação`;
+    }
+  } catch (error) {
+    logger.error(`Erro ao criar arquivo ${caminho}`, { error: error.message, stack: error.stack });
+    return `ERRO ao criar arquivo ${caminho}: ${error.message}`;
+  }
 }
+
 
 function toolLerArquivo(caminho) {
   if (!fs.existsSync(caminho)) return `Arquivo não encontrado: ${caminho}`;

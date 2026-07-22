@@ -1,0 +1,4 @@
+[2026-07-22T23:15:28.340Z] [DEBUG] Criando arquivo: /workspace/workspace_output/teste.txt, diretório: /workspace/workspace_output
+[2026-07-22T23:15:28.343Z] [DEBUG] Escrevendo conteúdo (21 bytes)
+[2026-07-22T23:15:28.344Z] [INFO] Arquivo criado com sucesso: /workspace/workspace_output/teste.txt (22 bytes)
+[2026-07-22T23:15:28.344Z] [INFO] | {"tool":"criar_arquivo","args":"{\"caminho\":\"/workspace/workspace_output/teste.txt\",\"conteudo\":\"Conteúdo de teste 123\"}","result":"Arquivo criado com sucesso: /workspace/workspace_output/teste.txt (22 bytes)","duration_ms":4} Tool: criar_arquivo
