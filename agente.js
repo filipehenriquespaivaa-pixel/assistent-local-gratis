@@ -1,97 +1,125 @@
 // ============================================================
-// agente.js — núcleo do agente (usado só pelo index.js agora que
+// agente.js — nucleo do agente (usado so pelo index.js agora que
 // a interface web foi removida).
 // ============================================================
 import path from 'path';
 import { tools, executeTool, resumoMemoria } from './tools.js';
 import { LM_STUDIO_URL, LM_STUDIO_BASE, MODEL, WORKSPACE, getHeaders } from './config.js';
+import { logger } from './logger.js';
 
 export { LM_STUDIO_URL, LM_STUDIO_BASE, MODEL, WORKSPACE, getHeaders };
 
+// ============ CONFIGURACAO DE RETRY E TIMEOUT ============
+const MAX_RETRIES = 3;
+const RETRY_DELAY_MS = 1000;
+const REQUEST_TIMEOUT_MS = 60000;
+
 // ============ SYSTEM PROMPT ============
-// A memória é injetada automaticamente aqui, a cada chamada, em vez de
-// depender do modelo lembrar de chamar consultar_memoria por conta própria
-// (um modelo pequeno raramente faz isso sem ser instruído a cada turno).
+// A memoria eh injetada automaticamente aqui, a cada chamada, em vez de
+// depender do modelo lembrar de chamar consultar_memoria por conta propria
+// (um modelo pequeno raramente faz isso sem ser instruido a cada turno).
 export function buildSystemPrompt() {
    const memoria = resumoMemoria();
    const blocoMemoria = memoria
-      ? `\n\nMEMÓRIA (o que você já sabe sobre o usuário e projetos anteriores — use isso, não pergunte de novo o que já está aqui):\n${memoria}`
+      ? `\n\nMEMORIA (o que voce ja sabe sobre o usuario e projetos anteriores — use isso, nao pergunte de novo o que ja esta aqui):\n${memoria}`
       : '';
 
-   return `Você é um agente de IA local chamado "Agente IA". Você tem ferramentas para ajudar o usuário.
+   return `Voce eh um agente de IA local chamado "Agente IA". Voce tem ferramentas para ajudar o usuario.
 
 Ferramentas:
 - criar_arquivo(caminho, conteudo) - Cria arquivo ou reescreve ele inteiro
 - editar_arquivo(caminho, busca, substituicao) - Substitui um trecho exato de um arquivo existente, sem reescrever tudo
-- ler_arquivo(caminho) - Lê arquivo
+- ler_arquivo(caminho) - Le arquivo
 - apagar_arquivo(caminho) - Apaga um arquivo
 - mover_arquivo(origem, destino) - Move/renomeia arquivo ou pasta
 - listar_diretorio(caminho) - Lista pasta
 - criar_pasta(caminho) - Cria pasta
 - buscar_na_internet(query) - Busca web
-- acessar_url(url) - Lê site
-- executar_comando(comando) - Executa PowerShell (o usuário precisa confirmar antes do comando rodar de verdade — não assuma aprovação)
+- acessar_url(url) - Le site
+- executar_comando(comando) - Executa PowerShell (o usuario precisa confirmar antes do comando rodar de verdade — nao assuma aprovacao)
 - abrir_programa(programa) - Abre programa
 - criar_projeto(nome, tipo) - Cria projeto (node/python/web)
-- salvar_memoria(categoria, chave, valor) - Salva na memória
-- consultar_memoria() - Lê memória
+- salvar_memoria(categoria, chave, valor) - Salva na memoria
+- consultar_memoria() - Le memoria
+- buscar_arquivos(padrao, diretorio, recursivo) - Busca arquivos por nome/padrao
+- monitorar_diretorio(diretorio, duracao) - Monitora mudancas em diretorio
 
-⚠️ INSTRUÇÕES CRÍTICAS PARA CRIAR CONTEÚDO:
-
-1. HISTÓRIAS, POESIAS, ARTIGOS, TEXTOS NARRATIVOS:
-   - SEMPRE escreva um texto COMPLETO e LONGO (MÍNIMO 15-20 linhas)
-   - Deve ter introdução clara, desenvolvimento interessante e conclusão
-   - Escreva como um AUTOR profissional, não como um resumo
-   - NUNCA coloque placeholders ou "continue depois"
-   - O conteúdo DEVE SER REAL, não apenas "história criada"
-
-2. CÓDIGO E SCRIPTS:
-   - Escreva código FUNCIONAL e TESTÁVEL
-   - Inclua comentários explicativos
-   - NUNCA deixe funções vazias ou em branco
-
-3. ARQUIVOS DE CONFIGURAÇÃO (JSON, YAML, .gitignore, .env):
-   - Podem ser curtos, mas devem ser COMPLETOS e ÚTEIS
-   - NUNCA apenas placeholders
+IMPORTANTE: Use buscar_arquivos quando precisar encontrar arquivos especificos.
+Use monitorar_diretorio para observar criacao/modificacao de arquivos em tempo real.
 
 Regras gerais:
-- Fale português brasileiro
-- Use ferramentas quando necessário
+- Fale portugues brasileiro
+- Use ferramentas quando necessario
 - Workspace: ${WORKSPACE}
-- PowerShell: use ; não &&
-- IMPORTANTE: se o usuário pedir algo funcional (um jogo, uma calculadora, um site específico, um script que faz algo), você MESMO escreve o código completo (HTML/CSS/JS/Python/etc) e salva com criar_arquivo
-- Prefira editar_arquivo a criar_arquivo quando for uma mudança pontual (uma função, uma linha, um trecho) em um arquivo que já existe e é grande
-- Se você fez um plano com uma lista de arquivos, crie/edite TODOS os arquivos listados antes de considerar a tarefa concluída
+- PowerShell: use ; nao &&
+- IMPORTANTE: se o usuario pedir algo funcional (um jogo, uma calculadora, um site especifico, um script que faz algo), voce MESMO escreve o codigo completo (HTML/CSS/JS/Python/etc) e salva com criar_arquivo
+- Prefira editar_arquivo a criar_arquivo quando for uma mudanca pontual (uma funcao, uma linha, um trecho) em um arquivo que ja existe e eh grande
+- Se voce fez um plano com uma lista de arquivos, crie/edite TODOS os arquivos listados antes de considerar a tarefa concluida
 - Depois de terminar um projeto/arquivo importante, salve um resumo curto em salvar_memoria (categoria "projetos") com o que foi feito${blocoMemoria}`;
 }
 
-// ============ CHAMADA AO LLM ============
+// ============ CHAMADA AO LLM COM RETRY ============
+async function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 export async function chamarLLM(messages, opcoes = {}) {
    const toolChoice = opcoes.toolChoice || 'auto';
-   let response;
-   try {
-      response = await fetch(LM_STUDIO_URL, {
+   let lastError;
+   
+   for (let tentativa = 1; tentativa <= MAX_RETRIES; tentativa++) {
+     try {
+       logger.debug(`Tentativa ${tentativa}/${MAX_RETRIES} de chamada LLM`);
+       
+       const controller = new AbortController();
+       const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+       
+       const response = await fetch(LM_STUDIO_URL, {
          method: 'POST',
          headers: getHeaders(),
-         body: JSON.stringify({ model: MODEL, messages, tools, tool_choice: toolChoice, temperature: 0.7, max_tokens: -1 })
-      });
-   } catch (e) {
-      throw new Error(`Não foi possível conectar ao LM Studio em ${LM_STUDIO_BASE}. Ele está aberto e com o servidor local ligado? (${e.message})`);
+         body: JSON.stringify({ model: MODEL, messages, tools, tool_choice: toolChoice, temperature: 0.7, max_tokens: -1 }),
+         signal: controller.signal
+       });
+       
+       clearTimeout(timeoutId);
+       
+       if (!response.ok) {
+         let corpo = '';
+         try { corpo = await response.text(); } catch { /* ignore */ }
+         
+         if (response.status >= 500 && tentativa < MAX_RETRIES) {
+           logger.warn(`Servidor retornou ${response.status}, tentando novamente em ${RETRY_DELAY_MS}ms`);
+           await sleep(RETRY_DELAY_MS * tentativa);
+           continue;
+         }
+         
+         throw new Error(`LM Studio respondeu com erro ${response.status}. ${corpo.substring(0, 300)}`);
+       }
+       
+       const data = await response.json();
+       if (!data.choices || !data.choices[0]) {
+         throw new Error('Resposta do LM Studio veio sem "choices" — verifique se o modelo carregado suporta tool calling.');
+       }
+       
+       logger.llmCall(MODEL, data.usage?.total_tokens || 0, 0);
+       return data;
+       
+     } catch (e) {
+       lastError = e;
+       logger.networkError(LM_STUDIO_URL, e);
+       
+       if (tentativa < MAX_RETRIES) {
+         logger.info(`Erro na tentativa ${tentativa}, retry em ${RETRY_DELAY_MS}ms: ${e.message}`);
+         await sleep(RETRY_DELAY_MS * tentativa);
+       }
+     }
    }
-   if (!response.ok) {
-      let corpo = '';
-      try { corpo = await response.text(); } catch { /* ignore */ }
-      throw new Error(`LM Studio respondeu com erro ${response.status}. ${corpo.substring(0, 300)}`);
-   }
-   const data = await response.json();
-   if (!data.choices || !data.choices[0]) {
-      throw new Error('Resposta do LM Studio veio sem "choices" — verifique se o modelo carregado suporta tool calling.');
-   }
-   return data;
+   
+   throw new Error(`Falha apos ${MAX_RETRIES} tentativas: ${lastError?.message || 'erro desconhecido'}`);
 }
 
 // ============ FALLBACK: tool calls escritas como JSON no texto ============
-// Modelos locais pequenos às vezes "esquecem" o formato oficial de tool_calls
+// Modelos locais pequenos as vezes "esquecem" o formato oficial de tool_calls
 // e escrevem um JSON solto no meio da resposta. Isso detecta e recupera esses casos.
 function detectarToolCallsNoTexto(texto) {
    const results = [];
@@ -108,16 +136,16 @@ function detectarToolCallsNoTexto(texto) {
 }
 
 // ============ FASE DE PLANEJAMENTO ============
-const VERBOS_CONSTRUCAO = /\b(crie|criar|cria|construa|construir|desenvolva|desenvolver|fa[çc]a|fazer|monte|montar|programe|programar|quero|preciso|gostaria|implemente|implementar|escreva|escrever|redija|redigir|conte|contar|narre|narrar|descreva|descrever)\b/i;
+const VERBOS_CONSTRUCAO = /\b(crie|criar|cria|construa|construir|desenvolva|desenvolver|faca|fazer|monte|montar|programe|programar|quero|preciso|gostaria|implemente|implementar|escreva|escrever|redija|redigir|conte|contar|narre|narrar|descreva|descrever)\b/i;
 const VERBOS_EDICAO = /\b(adicione|adicionar|mude|mudar|altere|alterar|corrija|corrigir|conserte|consertar|arrume|arrumar|melhore|melhorar|ajuste|ajustar|remova|remover|atualize|atualizar|refatore|refatorar)\b/i;
 
-const SUBSTANTIVOS_CONSTRUCAO = /\b(jogo|game|app|aplicativo|site|p[aá]gina|landing\s?page|sistema|script|programa|calculadora|to-?do|lista de tarefas|api|bot|chatbot|automa[çc][ãa]o|ferramenta|história|poesia|artigo|texto|conto|romance|redação|resumo|documento|relatório|apresentação|palestra|aula|tutorial|guia|manual|receita|roteiro|projeto)\b/i;
+const SUBSTANTIVOS_CONSTRUCAO = /\b(jogo|game|app|aplicativo|site|pagina|landing\s?page|sistema|script|programa|calculadora|to-?do|lista de tarefas|api|bot|chatbot|automacao|ferramenta|historia|poesia|artigo|texto|conto|romance|redacao|resumo|documento|relatorio|apresentacao|palestra|aula|tutorial|guia|manual|receita|roteiro|projeto)\b/i;
 
 const REGEX_ARQUIVO_MENCIONADO = /\b[\w\-]+\.(html|htm|css|js|jsx|ts|tsx|json|py|txt|md|bat|ps1|sh|sql)\b/gi;
 
-const NEGACAO_PROXIMA_AO_VERBO = /\bn[ãa]o\s+(?:\w+\s+){0,2}(quero|precise|precisa|crie|criar|construa|fa[çc]a|desenvolva|monte|programe|implemente)\b/i;
+const NEGACAO_PROXIMA_AO_VERBO = /\bnao\s+(?:\w+\s+){0,2}(quero|precise|precisa|crie|criar|construa|faca|desenvolva|monte|programe|implemente)\b/i;
 
-const CONFIRMACAO_CURTA = /^\s*(sim|ok(?:ay)?|pode|pode ir|continue|continua|vai|manda|manda ver|show|isso a[íi]|perfeito|beleza|blz)[\s!.,]*$/i;
+const CONFIRMACAO_CURTA = /^\s*(sim|ok(?:ay)?|pode|pode ir|continue|continua|vai|manda|manda ver|show|isso ai|perfeito|beleza|blz)[\s!.,]*$/i;
 
 function extrairArquivosMencionados(msg) {
    const matches = msg.match(REGEX_ARQUIVO_MENCIONADO) || [];
@@ -143,8 +171,8 @@ async function lerArquivosMencionados(nomes) {
       } catch {
          continue;
       }
-      if (!conteudo || conteudo.startsWith('Arquivo não encontrado') || conteudo.startsWith('Erro')) continue;
-      blocos.push(`--- ${nome} (conteúdo atual, ${caminho}) ---\n${conteudo}`);
+      if (!conteudo || conteudo.startsWith('Arquivo nao encontrado') || conteudo.startsWith('Erro')) continue;
+      blocos.push(`--- ${nome} (conteudo atual, ${caminho}) ---\n${conteudo}`);
    }
    return blocos.join('\n\n');
 }
@@ -156,14 +184,14 @@ async function planejar(conversationHistory, systemPrompt, mensagemUsuario, arqu
       role: 'system',
       content:
          (contextoArquivos
-            ? `Conteúdo atual dos arquivos mencionados pelo usuário:\n\n${contextoArquivos}\n\n`
+            ? `Conteudo atual dos arquivos mencionados pelo usuario:\n\n${contextoArquivos}\n\n`
             : '') +
          'Antes de usar qualquer ferramenta, escreva um plano curto seguindo EXATAMENTE este formato:\n' +
          'ARQUIVOS:\n' +
-         '- caminho/do/arquivo.ext: breve descrição\n' +
-         'LÓGICA/CONTEÚDO:\n' +
-         '- descreva o que será escrito\n\n' +
-         'NÃO chame nenhuma ferramenta nesta resposta — só escreva o plano.'
+         '- caminho/do/arquivo.ext: breve descricao\n' +
+         'LOGICA/CONTEUDO:\n' +
+         '- descreva o que sera escrito\n\n' +
+         'NAO chame nenhuma ferramenta nesta resposta — so escreva o plano.'
    };
    const msgs = [{ role: 'system', content: systemPrompt }, ...conversationHistory, instrucaoPlano];
    const resposta = await chamarLLM(msgs, { toolChoice: 'none' });
@@ -268,7 +296,7 @@ export async function agenteLoop(mensagemUsuario, conversationHistory, onToolCal
       message = resposta.choices[0].message;
    }
 
-   // ============ VERIFICAÇÃO DO PLANO ============
+   // ============ VERIFICACAO DO PLANO ============
    const MAX_TENTATIVAS_CORRECAO = 3;
 
    if (arquivosPlanejados.length > 0 && iteracoes < MAX_ITERACOES) {
@@ -280,8 +308,8 @@ export async function agenteLoop(mensagemUsuario, conversationHistory, onToolCal
          conversationHistory.push({
             role: 'system',
             content:
-               `⚠️ IMPORTANTE: Você prometeu criar estes arquivos e eles NÃO foram criados ainda: ${faltando.join(', ')}. ` +
-               'Crie-os AGORA com criar_arquivo(). Escreva conteúdo COMPLETO e REAL, não placeholders!'
+               `⚠️ IMPORTANTE: Voce prometeu criar estes arquivos e eles NAO foram criados ainda: ${faltando.join(', ')}. ` +
+               'Crie-os AGORA com criar_arquivo(). Escreva conteudo COMPLETO e REAL, nao placeholders!'
          });
 
          if (onPensando) onPensando('processando');

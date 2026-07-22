@@ -5,6 +5,7 @@ import https from 'https';
 import http from 'http';
 import zlib from 'zlib';
 import { WORKSPACE } from './config.js';
+import { logger } from './logger.js';
 
 // ============ CONFIRMAÇÃO DE COMANDOS ============
 // executar_comando roda coisas no terminal do usuário — antes isso executava
@@ -114,6 +115,8 @@ function httpGet(url, maxRedirects = 3) {
 
 // ============ FERRAMENTAS ============
 
+// ============ NOVAS FERRAMENTAS DE BUSCA E MONITORAMENTO ============
+
 export const tools = [
   {
     type: 'function',
@@ -140,6 +143,37 @@ export const tools = [
           url: { type: 'string', description: 'URL completa (http:// ou https://)' }
         },
         required: ['url']
+      }
+    }
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'buscar_arquivos',
+      description: 'Busca arquivos por nome ou padrão em um diretório (suporta wildcards * e ?). Útil para encontrar arquivos específicos.',
+      parameters: {
+        type: 'object',
+        properties: {
+          padrao: { type: 'string', description: 'Padrão de busca (ex: "*.js", "config.*", "meu_arquivo.txt")' },
+          diretorio: { type: 'string', description: 'Diretório para buscar (padrão: workspace)' },
+          recursivo: { type: 'boolean', description: 'Buscar em subdiretórios também', default: false }
+        },
+        required: ['padrao']
+      }
+    }
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'monitorar_diretorio',
+      description: 'Monitora mudanças em um diretório e retorna as últimas alterações (criação, modificação, exclusão de arquivos).',
+      parameters: {
+        type: 'object',
+        properties: {
+          diretorio: { type: 'string', description: 'Diretório para monitorar' },
+          duracao: { type: 'number', description: 'Tempo de monitoramento em segundos (máx: 60)', default: 10 }
+        },
+        required: ['diretorio']
       }
     }
   },
@@ -328,6 +362,8 @@ export const tools = [
 const ARGS_OBRIGATORIOS = {
   buscar_na_internet: ['query'],
   acessar_url: ['url'],
+  buscar_arquivos: ['padrao'],
+  monitorar_diretorio: ['diretorio'],
   criar_arquivo: ['caminho', 'conteudo'],
   ler_arquivo: ['caminho'],
   // 'substituicao' fica de fora de propósito: pode ser uma string vazia
@@ -346,6 +382,8 @@ const ARGS_OBRIGATORIOS = {
 export async function executeTool(name, args) {
   args = args || {};
   const obrigatorios = ARGS_OBRIGATORIOS[name];
+  const inicio = Date.now();
+  
   if (obrigatorios) {
     const faltando = obrigatorios.filter(campo => args[campo] === undefined || args[campo] === null || args[campo] === '');
     if (faltando.length > 0) {
@@ -353,29 +391,204 @@ export async function executeTool(name, args) {
     }
   }
   try {
+    let resultado;
     switch (name) {
-      case 'buscar_na_internet': return await toolBuscar(args.query);
-      case 'acessar_url': return await toolAcessarURL(args.url);
-      case 'criar_arquivo': return toolCriarArquivo(args.caminho, args.conteudo);
-      case 'ler_arquivo': return toolLerArquivo(args.caminho);
-      case 'editar_arquivo': return toolEditarArquivo(args.caminho, args.busca, args.substituicao ?? '');
-      case 'apagar_arquivo': return toolApagarArquivo(args.caminho);
-      case 'mover_arquivo': return toolMoverArquivo(args.origem, args.destino);
-      case 'listar_diretorio': return toolListarDiretorio(args.caminho || WORKSPACE);
-      case 'criar_pasta': return toolCriarPasta(args.caminho);
-      case 'executar_comando': return await toolExecutarComando(args.comando);
-      case 'abrir_programa': return await toolAbrirPrograma(args.programa, args.argumentos);
-      case 'salvar_memoria': return toolSalvarMemoria(args.categoria, args.chave, args.valor);
-      case 'consultar_memoria': return toolConsultarMemoria(args.categoria);
-      case 'criar_projeto': return await toolCriarProjeto(args.nome, args.tipo, args.localizacao);
-      default: return `Ferramenta desconhecida: ${name}`;
+      case 'buscar_na_internet': resultado = await toolBuscar(args.query); break;
+      case 'acessar_url': resultado = await toolAcessarURL(args.url); break;
+      case 'buscar_arquivos': resultado = await toolBuscarArquivos(args.padrao, args.diretorio, args.recursivo); break;
+      case 'monitorar_diretorio': resultado = await toolMonitorarDiretorio(args.diretorio, args.duracao); break;
+      case 'criar_arquivo': resultado = toolCriarArquivo(args.caminho, args.conteudo); break;
+      case 'ler_arquivo': resultado = toolLerArquivo(args.caminho); break;
+      case 'editar_arquivo': resultado = toolEditarArquivo(args.caminho, args.busca, args.substituicao ?? ''); break;
+      case 'apagar_arquivo': resultado = toolApagarArquivo(args.caminho); break;
+      case 'mover_arquivo': resultado = toolMoverArquivo(args.origem, args.destino); break;
+      case 'listar_diretorio': resultado = toolListarDiretorio(args.caminho || WORKSPACE); break;
+      case 'criar_pasta': resultado = toolCriarPasta(args.caminho); break;
+      case 'executar_comando': resultado = await toolExecutarComando(args.comando); break;
+      case 'abrir_programa': resultado = await toolAbrirPrograma(args.programa, args.argumentos); break;
+      case 'salvar_memoria': resultado = toolSalvarMemoria(args.categoria, args.chave, args.valor); break;
+      case 'consultar_memoria': resultado = toolConsultarMemoria(args.categoria); break;
+      case 'criar_projeto': resultado = await toolCriarProjeto(args.nome, args.tipo, args.localizacao); break;
+      default: resultado = `Ferramenta desconhecida: ${name}`;
     }
+    
+    // Log da tool call
+    const duracao = Date.now() - inicio;
+    logger.toolCall(name, args, resultado, duracao);
+    
+    return resultado;
   } catch (error) {
+    logger.error(`Erro ao executar ${name}`, { error: error.message, args });
     return `Erro ao executar ${name}: ${error.message}`;
   }
 }
 
 // ============ IMPLEMENTAÇÕES ============
+
+// ============ BUSCA DE ARQUIVOS ============
+async function toolBuscarArquivos(padrao, diretorio = WORKSPACE, recursivo = false) {
+  const start = Date.now();
+  const resultados = [];
+  
+  try {
+    // Converte padrão glob para regex
+    const regexPattern = padrao
+      .replace(/[.+^${}()|[\]\\]/g, '\\$&')
+      .replace(/\*/g, '.*')
+      .replace(/\?/g, '.');
+    const regex = new RegExp(`^${regexPattern}$`, 'i');
+    
+    function buscar(dir) {
+      if (!fs.existsSync(dir)) return;
+      
+      const items = fs.readdirSync(dir);
+      for (const item of items) {
+        const fullPath = path.join(dir, item);
+        try {
+          const stat = fs.statSync(fullPath);
+          if (stat.isDirectory()) {
+            if (recursivo) buscar(fullPath);
+          } else if (regex.test(item)) {
+            resultados.push({
+              nome: item,
+              caminho: fullPath,
+              tamanho: stat.size,
+              modificado: stat.mtime.toISOString()
+            });
+          }
+        } catch (e) {
+          logger.debug(`Erro ao acessar ${fullPath}`, { error: e.message });
+        }
+      }
+    }
+    
+    buscar(diretorio);
+    
+    const duracao = Date.now() - start;
+    logger.info(`Busca de arquivos completada`, { encontrados: resultados.length, duracao_ms: duracao });
+    
+    if (resultados.length === 0) return `Nenhum arquivo encontrado com o padrão "${padrao}" em ${diretorio}`;
+    
+    const limite = 50;
+    const exibidos = resultados.slice(0, limite);
+    let output = `Encontrados ${resultados.length} arquivo(s) com padrão "${padrao}":\n\n`;
+    output += exibidos.map((r, i) => `${i + 1}. ${r.nome} (${r.tamanho} bytes) - ${r.caminho}`).join('\n');
+    if (resultados.length > limite) output += `\n\n... e mais ${resultados.length - limite} arquivos.`;
+    
+    return output;
+  } catch (error) {
+    logger.error(`Erro na busca de arquivos`, { error: error.message, padrao, diretorio });
+    return `Erro ao buscar arquivos: ${error.message}`;
+  }
+}
+
+// ============ MONITORAMENTO DE DIRETÓRIO ============
+async function toolMonitorarDiretorio(diretorio, duracao = 10) {
+  // Limita duração máxima a 60 segundos
+  duracao = Math.min(duracao || 10, 60);
+  
+  return new Promise((resolve) => {
+    if (!fs.existsSync(diretorio)) {
+      resolve(`Diretório não encontrado: ${diretorio}`);
+      return;
+    }
+    
+    const alteracoes = [];
+    const snapshotInicial = new Map();
+    
+    // Captura estado inicial
+    function capturarSnapshot() {
+      const snapshot = new Map();
+      try {
+        const items = fs.readdirSync(diretorio, { recursive: true });
+        for (const item of items) {
+          const fullPath = path.join(diretorio, item);
+          try {
+            const stat = fs.statSync(fullPath);
+            snapshot.set(fullPath, { mtime: stat.mtimeMs, size: stat.size });
+          } catch (e) {
+            // Arquivo pode ter sido deletado entre listagem e stat
+          }
+        }
+      } catch (e) {
+        logger.debug(`Erro ao capturar snapshot`, { error: e.message });
+      }
+      return snapshot;
+    }
+    
+    snapshotInicial.set(capturarSnapshot());
+    
+    // Observa mudanças
+    let timeoutId;
+    let changeTimeout;
+    
+    const watcher = fs.watch(diretorio, { recursive: true }, (eventType, filename) => {
+      if (!filename) return;
+      
+      const fullPath = path.join(diretorio, filename);
+      const timestamp = new Date().toISOString();
+      
+      clearTimeout(changeTimeout);
+      
+      // Debounce para evitar múltiplos eventos para mesma mudança
+      changeTimeout = setTimeout(() => {
+        try {
+          const stat = fs.statSync(fullPath);
+          alteracoes.push({
+            tipo: eventType === 'change' ? 'modificado' : eventType === 'rename' ? 'criado/excluído' : eventType,
+            arquivo: filename,
+            caminho: fullPath,
+            tamanho: stat.size,
+            timestamp
+          });
+        } catch (e) {
+          // Arquivo foi deletado
+          alteracoes.push({
+            tipo: 'excluído',
+            arquivo: filename,
+            caminho: fullPath,
+            timestamp
+          });
+        }
+      }, 100);
+    });
+    
+    // Finaliza após duração especificada
+    timeoutId = setTimeout(() => {
+      watcher.close();
+      
+      const snapshotFinal = capturarSnapshot();
+      
+      // Compara snapshots para detectar exclusões
+      for (const [caminho, dados] of snapshotInicial) {
+        if (!snapshotFinal.has(caminho)) {
+          alteracoes.push({
+            tipo: 'excluído',
+            arquivo: path.basename(caminho),
+            caminho,
+            timestamp: new Date().toISOString()
+          });
+        }
+      }
+      
+      logger.info(`Monitoramento completado`, { alteracoes: alteracoes.length, diretorio });
+      
+      if (alteracoes.length === 0) {
+        resolve(`Nenhuma alteração detectada em ${diretorio} durante ${duracao}s`);
+      } else {
+        let output = `Alterações detectadas em ${diretorio} (${duracao}s):\n\n`;
+        output += alteracoes.map((a, i) => 
+          `${i + 1}. [${a.tipo}] ${a.arquivo}${a.tamanho ? ` (${a.tamanho} bytes)` : ''} às ${a.timestamp}`
+        ).join('\n');
+        resolve(output);
+      }
+    }, duracao * 1000);
+    
+    // Guarda IDs pra poder limpar se necessário
+    timeoutId.unref();
+    if (changeTimeout) changeTimeout.unref();
+  });
+}
 
 async function toolBuscar(query) {
   // Usa DuckDuckGo HTML lite (sem JS necessário)
