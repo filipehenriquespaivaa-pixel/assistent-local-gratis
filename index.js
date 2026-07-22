@@ -1,6 +1,8 @@
 import readline from 'readline';
 import { tools, executeTool, setConfirmador } from './tools.js';
 import { MODEL, LM_STUDIO_BASE, getHeaders, agenteLoop } from './agente.js';
+import { logger } from './logger.js';
+import { loadProfile, listProfiles } from './config-manager.js';
 
 // ============ CORES ============
 const c = {
@@ -34,9 +36,9 @@ function moveCursor(row, col) {
 
 function drawHeader() {
   const { cols } = getTerminalSize();
-  const title = ' 🤖 AGENTE IA LOCAL ';
+  const title = ' AGENTE IA LOCAL ';
   const model = ` ${MODEL} `;
-  const status = ' ● Conectado ';
+  const status = ' Conectado ';
   
   moveCursor(1, 1);
   process.stdout.write(`${c.bgCyan}${c.bold}${c.white}${title}${c.reset}`);
@@ -59,24 +61,26 @@ function drawSidebar() {
   
   // Título ferramentas
   moveCursor(4, sidebarCol);
-  process.stdout.write(`${c.gray}│${c.reset}${c.bold}${c.cyan} 🔧 FERRAMENTAS ${' '.repeat(LAYOUT.sidebarWidth - 18)}${c.gray}│${c.reset}`);
+  process.stdout.write(`${c.gray}│${c.reset}${c.bold}${c.cyan}  FERRAMENTAS ${' '.repeat(LAYOUT.sidebarWidth - 18)}${c.gray}│${c.reset}`);
   
   // Lista de ferramentas
   const toolNames = [
-    '📄 criar_arquivo',
-    '✏️ editar_arquivo',
-    '📖 ler_arquivo',
-    '🗑️ apagar_arquivo',
-    '🔀 mover_arquivo',
-    '📁 listar_diretorio',
-    '📂 criar_pasta',
-    '🌐 buscar_na_internet',
-    '🔗 acessar_url',
-    '💻 executar_comando',
-    '🚀 abrir_programa',
-    '📦 criar_projeto',
-    '🧠 salvar_memoria',
-    '🔍 consultar_memoria',
+    ' criar_arquivo',
+    ' editar_arquivo',
+    ' ler_arquivo',
+    ' apagar_arquivo',
+    ' mover_arquivo',
+    ' listar_diretorio',
+    ' criar_pasta',
+    ' buscar_na_internet',
+    ' acessar_url',
+    ' executar_comando',
+    ' abrir_programa',
+    ' criar_projeto',
+    ' salvar_memoria',
+    ' consultar_memoria',
+    ' buscar_arquivos',
+    ' monitorar_dir',
   ];
   
   for (let i = 0; i < toolNames.length && i < chatHeight - 4; i++) {
@@ -97,9 +101,9 @@ function drawSidebar() {
   process.stdout.write(`${c.gray}├${'─'.repeat(LAYOUT.sidebarWidth - 2)}┤${c.reset}`);
   
   moveCursor(cmdRow + 1, sidebarCol);
-  process.stdout.write(`${c.gray}│${c.reset}${c.bold}${c.yellow} ⌨ COMANDOS ${' '.repeat(LAYOUT.sidebarWidth - 14)}${c.gray}│${c.reset}`);
+  process.stdout.write(`${c.gray}│${c.reset}${c.bold}${c.yellow}  COMANDOS ${' '.repeat(LAYOUT.sidebarWidth - 14)}${c.gray}│${c.reset}`);
   
-  const cmds = ['/limpar', '/memoria', '/ferramentas', '/sair'];
+  const cmds = ['/limpar', '/memoria', '/ferramentas', '/perfis', '/sair'];
   for (let i = 0; i < cmds.length; i++) {
     moveCursor(cmdRow + 2 + i, sidebarCol);
     const cmd = cmds[i].padEnd(LAYOUT.sidebarWidth - 4);
@@ -116,7 +120,7 @@ function drawStatusBar(message = '') {
   const statusRow = rows - 1;
   
   moveCursor(statusRow, 1);
-  process.stdout.write(`${c.bgBlue}${c.white} 🧑 Digite sua mensagem... ${' '.repeat(Math.max(0, cols - 30))}${c.reset}`);
+  process.stdout.write(`${c.bgBlue}${c.white}  Digite sua mensagem... ${' '.repeat(Math.max(0, cols - 30))}${c.reset}`);
 }
 
 function drawLayout() {
@@ -131,7 +135,7 @@ let conversationHistory = [];
 // Callback pra mostrar cada tool call na tela, chamado pelo agenteLoop compartilhado
 function aoChamarTool(funcName, funcArgs, status, resultado) {
   if (funcName === 'planejamento') {
-    process.stdout.write(`\n  ${c.magenta}📋${c.reset} ${c.bold}Plano:${c.reset}\n${c.dim}${resultado}${c.reset}\n`);
+    process.stdout.write(`\n  ${c.magenta} Plano:${c.reset}\n${c.dim}${resultado}${c.reset}\n`);
     return;
   }
   if (status === 'running') {
@@ -165,6 +169,9 @@ function formatResponse(text) {
 }
 
 async function main() {
+  // Iniciar logging
+  logger.sessionStart();
+  
   drawLayout();
   
   // Verificar conexão
@@ -181,15 +188,14 @@ async function main() {
     const { rows } = getTerminalSize();
     moveCursor(rows, 1);
     process.stdout.write(`  ${c.red}✗${c.reset} ${c.red}Erro: LM Studio não conectado${c.reset}`);
+    logger.error('Falha ao conectar no LM Studio', { url: LM_STUDIO_BASE });
     setTimeout(() => process.exit(1), 2000);
     return;
   }
 
   const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
 
-  // Confirmação real antes de qualquer comando de terminal rodar. Antes o
-  // agente executava PowerShell direto, sem perguntar nada — agora para e
-  // espera "s" do usuário antes de seguir.
+  // Confirmação real antes de qualquer comando de terminal rodar
   setConfirmador((comando) => {
     return new Promise((resolve) => {
       process.stdout.write(`\n\n  ${c.bgRed}${c.white} ⚠ CONFIRMAR COMANDO ${c.reset}\n`);
@@ -214,6 +220,7 @@ async function main() {
       if (texto === '/sair') {
         clearScreen();
         console.log(`\n  ${c.cyan}👋 Até logo!${c.reset}\n`);
+        logger.sessionEnd();
         rl.close();
         process.exit(0);
       }
@@ -232,6 +239,13 @@ async function main() {
         tools.forEach(t => console.log(`    ${c.cyan}•${c.reset} ${t.function.name}`));
         return prompt();
       }
+      if (texto === '/perfis') {
+        const perfis = listProfiles();
+        console.log(`\n\n  ${c.cyan}📋 Perfis disponíveis:${c.reset}`);
+        perfis.forEach(p => console.log(`    ${c.green}•${c.reset} ${p}`));
+        console.log(`\n  ${c.dim}Use: node index.js --perfil <nome>${c.reset}`);
+        return prompt();
+      }
 
       // Processar mensagem
       try {
@@ -247,6 +261,7 @@ async function main() {
         console.log(`  ${c.dim}─${''.repeat(50)}${c.reset}`);
       } catch (error) {
         console.log(`\n\n  ${c.red}✗ Erro: ${error.message}${c.reset}`);
+        logger.error('Erro no agenteLoop', { error: error.message });
       }
 
       prompt();
@@ -258,5 +273,11 @@ async function main() {
 
 // Redimensionamento
 process.stdout.on('resize', () => drawLayout());
+
+// Cleanup on exit
+process.on('SIGINT', () => {
+  logger.sessionEnd();
+  process.exit(0);
+});
 
 main();
