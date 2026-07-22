@@ -149,9 +149,15 @@ function aoChamarTool(funcName, funcArgs, status, resultado) {
 }
 
 // Callback pro indicador de "pensando/processando/planejando", chamado pelo agenteLoop compartilhado
+// Callback pro indicador de "pensando/processando/planejando/executando"
 function aoPensar(fase) {
-  const textos = { pensando: 'Pensando...', processando: 'Processando...', planejando: 'Planejando antes de escrever o código...' };
-  process.stdout.write(`\n  ${c.cyan}⠋${c.reset} ${c.dim}${textos[fase] || 'Processando...'}${c.reset}`);
+  const textos = { 
+    pensando: 'Pensando...', 
+    processando: 'Processando...', 
+    planejando: 'Gerando plano do projeto...',
+    executando: 'Executando etapa atual...'
+  };
+  process.stdout.write(`\n  ${c.cyan}â›‹${c.reset} ${c.dim}${textos[fase] || 'Processando...'}${c.reset}`);
 }
 
 // ============ INTERFACE ============
