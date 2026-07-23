@@ -55,19 +55,41 @@ function detectarTipoPedido(texto) {
 
 // Extrai informações sobre local/arquivo de destino
 function extrairDestino(texto) {
+  const textoLower = texto.toLowerCase();
+  
+  // Padrões específicos para caminhos do Windows (ex: D:\pasta, C:\users\...)
+  const padraoWindows = /([a-zA-Z]:\\[a-zA-Z0-9_\-\\\s]+)/i;
+  const matchWindows = texto.match(padraoWindows);
+  if (matchWindows && matchWindows[1]) {
+    return matchWindows[1].trim();
+  }
+  
+  // Padrões para caminhos Unix/Linux (ex: /home/user/, ./pasta/)
+  const padraoUnix = /(\/[a-zA-Z0-9_\-\/]+)/i;
+  const matchUnix = texto.match(padraoUnix);
+  if (matchUnix && matchUnix[1]) {
+    return matchUnix[1].trim();
+  }
+  
+  // Padrões genéricos para "na pasta X", "no local X", etc.
   const padroesDestino = [
     /na\s+pasta\s+([a-zA-Z0-9_\-\/]+)/i,
     /no\s+local\s+([a-zA-Z0-9_\-\/]+)/i,
-    /em\s+([a-zA-Z0-9_\-\/]+)/i,
+    /no\s+diret[oó]rio\s+([a-zA-Z0-9_\-\/]+)/i,
     /salvar\s+em\s+([a-zA-Z0-9_\-\/]+)/i,
-    /diretorio[:\s]+([a-zA-Z0-9_\-\/]+)/i,
-    /pasta[:\s]+([a-zA-Z0-9_\-\/]+)/i
+    /diret[oó]rio[:\s]+([a-zA-Z0-9_\-\/]+)/i,
+    /pasta[:\s]+([a-zA-Z0-9_\-\/]+)/i,
+    /em\s+([a-zA-Z0-9_\-\.\\/\s]+)/i  // Mais permissivo para capturar nomes de pastas
   ];
   
   for (const padrao of padroesDestino) {
     const match = texto.match(padrao);
     if (match && match[1]) {
-      return match[1].trim();
+      const destino = match[1].trim();
+      // Evita capturar palavras que são idiomas ou formatos
+      if (!['português', 'portugues', 'inglês', 'ingles', 'espanhol', 'html', 'python', 'javascript'].includes(destino.toLowerCase())) {
+        return destino;
+      }
     }
   }
   
@@ -87,7 +109,7 @@ function extrairPreferencias(texto) {
   // Detecta preferências de formato
   if (/html|web|site/.test(textoLower)) {
     preferencias.push('formato_html');
-  } else if (/python|script/.test(textoLower)) {
+  } else if (/python|script py/.test(textoLower)) {
     preferencias.push('formato_python');
   } else if (/javascript|js/.test(textoLower)) {
     preferencias.push('formato_javascript');
@@ -100,10 +122,10 @@ function extrairPreferencias(texto) {
     preferencias.push('tamanho_longo');
   }
   
-  // Detecta idioma
-  if (/portugu[êe]s|pt-br|brasileiro/.test(textoLower)) {
+  // Detecta idioma - verifica se é mencionado como requisito, não como destino
+  if (/\bportugu[êe]s\b|\bpt-br\b|\bbrasileiro\b/.test(textoLower)) {
     preferencias.push('idioma_portugues');
-  } else if (/ingl[eê]s|english/.test(textoLower)) {
+  } else if (/\bingl[eê]s\b|\benglish\b/.test(textoLower)) {
     preferencias.push('idioma_ingles');
   }
   

@@ -2,4 +2,33 @@
 # Logs
 *.log
 logs/
+
+# Environment
+.env
+.env.local
+*.env.*
+
+# Dependencies
+node_modules/
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# Build artifacts
+dist/
+build/
+target/
+
+# Editors
+.vscode/
+.idea/
+
+# Temp files
+*.tmp
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
 ```
