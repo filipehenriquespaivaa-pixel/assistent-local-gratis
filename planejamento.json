@@ -1,0 +1,724 @@
+{
+  "ultimo_planejamento": {
+    "metadata": {
+      "id": "planejamento_1784839943617",
+      "timestamp_criacao": "2026-07-23T20:52:23.617Z",
+      "versao": "1.0"
+    },
+    "pedido_original": "Criar um jogo da cobrinha em python simples na pasta jogos",
+    "interpretacao": {
+      "tipo_identificado": "programacao",
+      "destino_identificado": "jogos",
+      "preferencias_detectadas": [
+        "simplicidade",
+        "formato_python"
+      ],
+      "resumo": "Pedido do tipo \"programacao\" com destino em \"jogos\""
+    },
+    "divisao_etapas": {
+      "total_etapas": 4,
+      "etapas_obrigatorias": 4,
+      "etapas": [
+        {
+          "id": 1,
+          "tipo": "analise",
+          "descricao": "Analisar e entender o pedido do usuário",
+          "acao_especifica": "Interpretar requisitos e identificar elementos chave",
+          "criterio_sucesso": "Compreensão clara do que deve ser produzido",
+          "obrigatoria": true
+        },
+        {
+          "id": 2,
+          "tipo": "criacao",
+          "subtipo": "codigo",
+          "descricao": "Desenvolver o código/programa solicitado",
+          "acao_especifica": "Implementar funcionalidades requeridas",
+          "criterios_sucesso": [
+            "Código funcional e executável",
+            "Seguir boas práticas da linguagem",
+            "Incluir comentários explicativos"
+          ],
+          "obrigatoria": true
+        },
+        {
+          "id": 3,
+          "tipo": "salvamento",
+          "descricao": "Salvar resultado no destino: jogos",
+          "acao_especifica": "Criar/editar arquivo em jogos",
+          "destino_sugerido": "jogos",
+          "criterios_sucesso": [
+            "Arquivo salvo corretamente",
+            "Local acessível",
+            "Nome descritivo"
+          ],
+          "obrigatoria": true
+        },
+        {
+          "id": 4,
+          "tipo": "validacao",
+          "descricao": "Validar se o resultado atende ao pedido original",
+          "acao_especifica": "Revisar produto final comparando com requisitos",
+          "criterios_sucesso": [
+            "Todos os requisitos atendidos",
+            "Qualidade adequada",
+            "Sem erros óbvios"
+          ],
+          "obrigatoria": true
+        }
+      ]
+    },
+    "arquivos_previstos": [
+      {
+        "caminho_sugerido": "jogos.py",
+        "tipo": "programacao",
+        "descricao": "Arquivo principal com o resultado"
+      }
+    ],
+    "estimativa_complexidade": "media",
+    "status": "planejado",
+    "execucao": {
+      "etapa_atual": 0,
+      "concluido": false,
+      "historico": []
+    }
+  },
+  "total_planejamentos": 8,
+  "historico": [
+    {
+      "metadata": {
+        "id": "planejamento_1784839943617",
+        "timestamp_criacao": "2026-07-23T20:52:23.617Z",
+        "versao": "1.0"
+      },
+      "pedido_original": "Criar um jogo da cobrinha em python simples na pasta jogos",
+      "interpretacao": {
+        "tipo_identificado": "programacao",
+        "destino_identificado": "jogos",
+        "preferencias_detectadas": [
+          "simplicidade",
+          "formato_python"
+        ],
+        "resumo": "Pedido do tipo \"programacao\" com destino em \"jogos\""
+      },
+      "divisao_etapas": {
+        "total_etapas": 4,
+        "etapas_obrigatorias": 4,
+        "etapas": [
+          {
+            "id": 1,
+            "tipo": "analise",
+            "descricao": "Analisar e entender o pedido do usuário",
+            "acao_especifica": "Interpretar requisitos e identificar elementos chave",
+            "criterio_sucesso": "Compreensão clara do que deve ser produzido",
+            "obrigatoria": true
+          },
+          {
+            "id": 2,
+            "tipo": "criacao",
+            "subtipo": "codigo",
+            "descricao": "Desenvolver o código/programa solicitado",
+            "acao_especifica": "Implementar funcionalidades requeridas",
+            "criterios_sucesso": [
+              "Código funcional e executável",
+              "Seguir boas práticas da linguagem",
+              "Incluir comentários explicativos"
+            ],
+            "obrigatoria": true
+          },
+          {
+            "id": 3,
+            "tipo": "salvamento",
+            "descricao": "Salvar resultado no destino: jogos",
+            "acao_especifica": "Criar/editar arquivo em jogos",
+            "destino_sugerido": "jogos",
+            "criterios_sucesso": [
+              "Arquivo salvo corretamente",
+              "Local acessível",
+              "Nome descritivo"
+            ],
+            "obrigatoria": true
+          },
+          {
+            "id": 4,
+            "tipo": "validacao",
+            "descricao": "Validar se o resultado atende ao pedido original",
+            "acao_especifica": "Revisar produto final comparando com requisitos",
+            "criterios_sucesso": [
+              "Todos os requisitos atendidos",
+              "Qualidade adequada",
+              "Sem erros óbvios"
+            ],
+            "obrigatoria": true
+          }
+        ]
+      },
+      "arquivos_previstos": [
+        {
+          "caminho_sugerido": "jogos.py",
+          "tipo": "programacao",
+          "descricao": "Arquivo principal com o resultado"
+        }
+      ],
+      "estimativa_complexidade": "media",
+      "status": "planejado",
+      "execucao": {
+        "etapa_atual": 0,
+        "concluido": false,
+        "historico": []
+      }
+    },
+    {
+      "metadata": {
+        "id": "planejamento_1784839943616",
+        "timestamp_criacao": "2026-07-23T20:52:23.616Z",
+        "versao": "1.0"
+      },
+      "pedido_original": "Criar uma história infantil simples em português no formato html",
+      "interpretacao": {
+        "tipo_identificado": "escrita",
+        "destino_identificado": "portugu",
+        "preferencias_detectadas": [
+          "simplicidade",
+          "formato_html",
+          "idioma_portugues"
+        ],
+        "resumo": "Pedido do tipo \"escrita\" com destino em \"portugu\""
+      },
+      "divisao_etapas": {
+        "total_etapas": 4,
+        "etapas_obrigatorias": 4,
+        "etapas": [
+          {
+            "id": 1,
+            "tipo": "analise",
+            "descricao": "Analisar e entender o pedido do usuário",
+            "acao_especifica": "Interpretar requisitos e identificar elementos chave",
+            "criterio_sucesso": "Compreensão clara do que deve ser produzido",
+            "obrigatoria": true
+          },
+          {
+            "id": 2,
+            "tipo": "criacao",
+            "subtipo": "texto",
+            "descricao": "Criar o conteúdo textual solicitado",
+            "acao_especifica": "Escrever história/texto conforme especificações",
+            "criterios_sucesso": [
+              "Possuir início, meio e fim",
+              "Apresentar personagens e contexto",
+              "Seguir preferências de estilo"
+            ],
+            "obrigatoria": true
+          },
+          {
+            "id": 3,
+            "tipo": "salvamento",
+            "descricao": "Salvar resultado no destino: portugu",
+            "acao_especifica": "Criar/editar arquivo em portugu",
+            "destino_sugerido": "portugu",
+            "criterios_sucesso": [
+              "Arquivo salvo corretamente",
+              "Local acessível",
+              "Nome descritivo"
+            ],
+            "obrigatoria": true
+          },
+          {
+            "id": 4,
+            "tipo": "validacao",
+            "descricao": "Validar se o resultado atende ao pedido original",
+            "acao_especifica": "Revisar produto final comparando com requisitos",
+            "criterios_sucesso": [
+              "Todos os requisitos atendidos",
+              "Qualidade adequada",
+              "Sem erros óbvios"
+            ],
+            "obrigatoria": true
+          }
+        ]
+      },
+      "arquivos_previstos": [
+        {
+          "caminho_sugerido": "portugu.md",
+          "tipo": "escrita",
+          "descricao": "Arquivo principal com o resultado"
+        }
+      ],
+      "estimativa_complexidade": "media",
+      "status": "planejado",
+      "execucao": {
+        "etapa_atual": 0,
+        "concluido": false,
+        "historico": []
+      }
+    },
+    {
+      "metadata": {
+        "id": "planejamento_1784839943615",
+        "timestamp_criacao": "2026-07-23T20:52:23.615Z",
+        "versao": "1.0"
+      },
+      "pedido_original": "Criar um codigo html de um jogo em local x",
+      "interpretacao": {
+        "tipo_identificado": "programacao",
+        "destino_identificado": "local",
+        "preferencias_detectadas": [
+          "formato_html"
+        ],
+        "resumo": "Pedido do tipo \"programacao\" com destino em \"local\""
+      },
+      "divisao_etapas": {
+        "total_etapas": 4,
+        "etapas_obrigatorias": 4,
+        "etapas": [
+          {
+            "id": 1,
+            "tipo": "analise",
+            "descricao": "Analisar e entender o pedido do usuário",
+            "acao_especifica": "Interpretar requisitos e identificar elementos chave",
+            "criterio_sucesso": "Compreensão clara do que deve ser produzido",
+            "obrigatoria": true
+          },
+          {
+            "id": 2,
+            "tipo": "criacao",
+            "subtipo": "codigo",
+            "descricao": "Desenvolver o código/programa solicitado",
+            "acao_especifica": "Implementar funcionalidades requeridas",
+            "criterios_sucesso": [
+              "Código funcional e executável",
+              "Seguir boas práticas da linguagem",
+              "Incluir comentários explicativos"
+            ],
+            "obrigatoria": true
+          },
+          {
+            "id": 3,
+            "tipo": "salvamento",
+            "descricao": "Salvar resultado no destino: local",
+            "acao_especifica": "Criar/editar arquivo em local",
+            "destino_sugerido": "local",
+            "criterios_sucesso": [
+              "Arquivo salvo corretamente",
+              "Local acessível",
+              "Nome descritivo"
+            ],
+            "obrigatoria": true
+          },
+          {
+            "id": 4,
+            "tipo": "validacao",
+            "descricao": "Validar se o resultado atende ao pedido original",
+            "acao_especifica": "Revisar produto final comparando com requisitos",
+            "criterios_sucesso": [
+              "Todos os requisitos atendidos",
+              "Qualidade adequada",
+              "Sem erros óbvios"
+            ],
+            "obrigatoria": true
+          }
+        ]
+      },
+      "arquivos_previstos": [
+        {
+          "caminho_sugerido": "local.html",
+          "tipo": "programacao",
+          "descricao": "Arquivo principal com o resultado"
+        }
+      ],
+      "estimativa_complexidade": "media",
+      "status": "planejado",
+      "execucao": {
+        "etapa_atual": 0,
+        "concluido": false,
+        "historico": []
+      }
+    },
+    {
+      "metadata": {
+        "id": "planejamento_1784839943615",
+        "timestamp_criacao": "2026-07-23T20:52:23.614Z",
+        "versao": "1.0"
+      },
+      "pedido_original": "Criar uma historia simples em local x",
+      "interpretacao": {
+        "tipo_identificado": "geral",
+        "destino_identificado": "local",
+        "preferencias_detectadas": [
+          "simplicidade"
+        ],
+        "resumo": "Pedido do tipo \"geral\" com destino em \"local\""
+      },
+      "divisao_etapas": {
+        "total_etapas": 3,
+        "etapas_obrigatorias": 3,
+        "etapas": [
+          {
+            "id": 1,
+            "tipo": "analise",
+            "descricao": "Analisar e entender o pedido do usuário",
+            "acao_especifica": "Interpretar requisitos e identificar elementos chave",
+            "criterio_sucesso": "Compreensão clara do que deve ser produzido",
+            "obrigatoria": true
+          },
+          {
+            "id": 2,
+            "tipo": "salvamento",
+            "descricao": "Salvar resultado no destino: local",
+            "acao_especifica": "Criar/editar arquivo em local",
+            "destino_sugerido": "local",
+            "criterios_sucesso": [
+              "Arquivo salvo corretamente",
+              "Local acessível",
+              "Nome descritivo"
+            ],
+            "obrigatoria": true
+          },
+          {
+            "id": 3,
+            "tipo": "validacao",
+            "descricao": "Validar se o resultado atende ao pedido original",
+            "acao_especifica": "Revisar produto final comparando com requisitos",
+            "criterios_sucesso": [
+              "Todos os requisitos atendidos",
+              "Qualidade adequada",
+              "Sem erros óbvios"
+            ],
+            "obrigatoria": true
+          }
+        ]
+      },
+      "arquivos_previstos": [
+        {
+          "caminho_sugerido": "local.txt",
+          "tipo": "geral",
+          "descricao": "Arquivo principal com o resultado"
+        }
+      ],
+      "estimativa_complexidade": "baixa",
+      "status": "planejado",
+      "execucao": {
+        "etapa_atual": 0,
+        "concluido": false,
+        "historico": []
+      }
+    },
+    {
+      "metadata": {
+        "id": "planejamento_1784839931395",
+        "timestamp_criacao": "2026-07-23T20:52:11.395Z",
+        "versao": "1.0"
+      },
+      "pedido_original": "Criar um jogo da cobrinha em python simples na pasta jogos",
+      "interpretacao": {
+        "tipo_identificado": "programacao",
+        "destino_identificado": "python simples na pasta jogos",
+        "preferencias_detectadas": [
+          "simplicidade",
+          "formato_python"
+        ],
+        "resumo": "Pedido do tipo \"programacao\" com destino em \"python simples na pasta jogos\""
+      },
+      "divisao_etapas": {
+        "total_etapas": 4,
+        "etapas_obrigatorias": 4,
+        "etapas": [
+          {
+            "id": 1,
+            "tipo": "analise",
+            "descricao": "Analisar e entender o pedido do usuário",
+            "acao_especifica": "Interpretar requisitos e identificar elementos chave",
+            "criterio_sucesso": "Compreensão clara do que deve ser produzido",
+            "obrigatoria": true
+          },
+          {
+            "id": 2,
+            "tipo": "criacao",
+            "subtipo": "codigo",
+            "descricao": "Desenvolver o código/programa solicitado",
+            "acao_especifica": "Implementar funcionalidades requeridas",
+            "criterios_sucesso": [
+              "Código funcional e executável",
+              "Seguir boas práticas da linguagem",
+              "Incluir comentários explicativos"
+            ],
+            "obrigatoria": true
+          },
+          {
+            "id": 3,
+            "tipo": "salvamento",
+            "descricao": "Salvar resultado no destino: python simples na pasta jogos",
+            "acao_especifica": "Criar/editar arquivo em python simples na pasta jogos",
+            "destino_sugerido": "python simples na pasta jogos",
+            "criterios_sucesso": [
+              "Arquivo salvo corretamente",
+              "Local acessível",
+              "Nome descritivo"
+            ],
+            "obrigatoria": true
+          },
+          {
+            "id": 4,
+            "tipo": "validacao",
+            "descricao": "Validar se o resultado atende ao pedido original",
+            "acao_especifica": "Revisar produto final comparando com requisitos",
+            "criterios_sucesso": [
+              "Todos os requisitos atendidos",
+              "Qualidade adequada",
+              "Sem erros óbvios"
+            ],
+            "obrigatoria": true
+          }
+        ]
+      },
+      "arquivos_previstos": [
+        {
+          "caminho_sugerido": "python simples na pasta jogos.py",
+          "tipo": "programacao",
+          "descricao": "Arquivo principal com o resultado"
+        }
+      ],
+      "estimativa_complexidade": "media",
+      "status": "planejado",
+      "execucao": {
+        "etapa_atual": 0,
+        "concluido": false,
+        "historico": []
+      }
+    },
+    {
+      "metadata": {
+        "id": "planejamento_1784839931395",
+        "timestamp_criacao": "2026-07-23T20:52:11.395Z",
+        "versao": "1.0"
+      },
+      "pedido_original": "Criar uma história infantil simples em português no formato html",
+      "interpretacao": {
+        "tipo_identificado": "escrita",
+        "destino_identificado": "português no formato html",
+        "preferencias_detectadas": [
+          "simplicidade",
+          "formato_html",
+          "idioma_portugues"
+        ],
+        "resumo": "Pedido do tipo \"escrita\" com destino em \"português no formato html\""
+      },
+      "divisao_etapas": {
+        "total_etapas": 4,
+        "etapas_obrigatorias": 4,
+        "etapas": [
+          {
+            "id": 1,
+            "tipo": "analise",
+            "descricao": "Analisar e entender o pedido do usuário",
+            "acao_especifica": "Interpretar requisitos e identificar elementos chave",
+            "criterio_sucesso": "Compreensão clara do que deve ser produzido",
+            "obrigatoria": true
+          },
+          {
+            "id": 2,
+            "tipo": "criacao",
+            "subtipo": "texto",
+            "descricao": "Criar o conteúdo textual solicitado",
+            "acao_especifica": "Escrever história/texto conforme especificações",
+            "criterios_sucesso": [
+              "Possuir início, meio e fim",
+              "Apresentar personagens e contexto",
+              "Seguir preferências de estilo"
+            ],
+            "obrigatoria": true
+          },
+          {
+            "id": 3,
+            "tipo": "salvamento",
+            "descricao": "Salvar resultado no destino: português no formato html",
+            "acao_especifica": "Criar/editar arquivo em português no formato html",
+            "destino_sugerido": "português no formato html",
+            "criterios_sucesso": [
+              "Arquivo salvo corretamente",
+              "Local acessível",
+              "Nome descritivo"
+            ],
+            "obrigatoria": true
+          },
+          {
+            "id": 4,
+            "tipo": "validacao",
+            "descricao": "Validar se o resultado atende ao pedido original",
+            "acao_especifica": "Revisar produto final comparando com requisitos",
+            "criterios_sucesso": [
+              "Todos os requisitos atendidos",
+              "Qualidade adequada",
+              "Sem erros óbvios"
+            ],
+            "obrigatoria": true
+          }
+        ]
+      },
+      "arquivos_previstos": [
+        {
+          "caminho_sugerido": "português no formato html.md",
+          "tipo": "escrita",
+          "descricao": "Arquivo principal com o resultado"
+        }
+      ],
+      "estimativa_complexidade": "media",
+      "status": "planejado",
+      "execucao": {
+        "etapa_atual": 0,
+        "concluido": false,
+        "historico": []
+      }
+    },
+    {
+      "metadata": {
+        "id": "planejamento_1784839931394",
+        "timestamp_criacao": "2026-07-23T20:52:11.394Z",
+        "versao": "1.0"
+      },
+      "pedido_original": "Criar um codigo html de um jogo em local x",
+      "interpretacao": {
+        "tipo_identificado": "programacao",
+        "destino_identificado": "local x",
+        "preferencias_detectadas": [
+          "formato_html"
+        ],
+        "resumo": "Pedido do tipo \"programacao\" com destino em \"local x\""
+      },
+      "divisao_etapas": {
+        "total_etapas": 4,
+        "etapas_obrigatorias": 4,
+        "etapas": [
+          {
+            "id": 1,
+            "tipo": "analise",
+            "descricao": "Analisar e entender o pedido do usuário",
+            "acao_especifica": "Interpretar requisitos e identificar elementos chave",
+            "criterio_sucesso": "Compreensão clara do que deve ser produzido",
+            "obrigatoria": true
+          },
+          {
+            "id": 2,
+            "tipo": "criacao",
+            "subtipo": "codigo",
+            "descricao": "Desenvolver o código/programa solicitado",
+            "acao_especifica": "Implementar funcionalidades requeridas",
+            "criterios_sucesso": [
+              "Código funcional e executável",
+              "Seguir boas práticas da linguagem",
+              "Incluir comentários explicativos"
+            ],
+            "obrigatoria": true
+          },
+          {
+            "id": 3,
+            "tipo": "salvamento",
+            "descricao": "Salvar resultado no destino: local x",
+            "acao_especifica": "Criar/editar arquivo em local x",
+            "destino_sugerido": "local x",
+            "criterios_sucesso": [
+              "Arquivo salvo corretamente",
+              "Local acessível",
+              "Nome descritivo"
+            ],
+            "obrigatoria": true
+          },
+          {
+            "id": 4,
+            "tipo": "validacao",
+            "descricao": "Validar se o resultado atende ao pedido original",
+            "acao_especifica": "Revisar produto final comparando com requisitos",
+            "criterios_sucesso": [
+              "Todos os requisitos atendidos",
+              "Qualidade adequada",
+              "Sem erros óbvios"
+            ],
+            "obrigatoria": true
+          }
+        ]
+      },
+      "arquivos_previstos": [
+        {
+          "caminho_sugerido": "local x.html",
+          "tipo": "programacao",
+          "descricao": "Arquivo principal com o resultado"
+        }
+      ],
+      "estimativa_complexidade": "media",
+      "status": "planejado",
+      "execucao": {
+        "etapa_atual": 0,
+        "concluido": false,
+        "historico": []
+      }
+    },
+    {
+      "metadata": {
+        "id": "planejamento_1784839931394",
+        "timestamp_criacao": "2026-07-23T20:52:11.391Z",
+        "versao": "1.0"
+      },
+      "pedido_original": "Criar uma historia simples em local x",
+      "interpretacao": {
+        "tipo_identificado": "geral",
+        "destino_identificado": "local x",
+        "preferencias_detectadas": [
+          "simplicidade"
+        ],
+        "resumo": "Pedido do tipo \"geral\" com destino em \"local x\""
+      },
+      "divisao_etapas": {
+        "total_etapas": 3,
+        "etapas_obrigatorias": 3,
+        "etapas": [
+          {
+            "id": 1,
+            "tipo": "analise",
+            "descricao": "Analisar e entender o pedido do usuário",
+            "acao_especifica": "Interpretar requisitos e identificar elementos chave",
+            "criterio_sucesso": "Compreensão clara do que deve ser produzido",
+            "obrigatoria": true
+          },
+          {
+            "id": 2,
+            "tipo": "salvamento",
+            "descricao": "Salvar resultado no destino: local x",
+            "acao_especifica": "Criar/editar arquivo em local x",
+            "destino_sugerido": "local x",
+            "criterios_sucesso": [
+              "Arquivo salvo corretamente",
+              "Local acessível",
+              "Nome descritivo"
+            ],
+            "obrigatoria": true
+          },
+          {
+            "id": 3,
+            "tipo": "validacao",
+            "descricao": "Validar se o resultado atende ao pedido original",
+            "acao_especifica": "Revisar produto final comparando com requisitos",
+            "criterios_sucesso": [
+              "Todos os requisitos atendidos",
+              "Qualidade adequada",
+              "Sem erros óbvios"
+            ],
+            "obrigatoria": true
+          }
+        ]
+      },
+      "arquivos_previstos": [
+        {
+          "caminho_sugerido": "local x.txt",
+          "tipo": "geral",
+          "descricao": "Arquivo principal com o resultado"
+        }
+      ],
+      "estimativa_complexidade": "baixa",
+      "status": "planejado",
+      "execucao": {
+        "etapa_atual": 0,
+        "concluido": false,
+        "historico": []
+      }
+    }
+  ]
+}

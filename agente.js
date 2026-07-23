@@ -8,6 +8,7 @@ import { tools, executeTool, resumoMemoria } from './tools.js';
 import { LM_STUDIO_URL, LM_STUDIO_BASE, MODEL, WORKSPACE, getHeaders } from './config.js';
 import { logger } from './logger.js';
 import { memoryManager } from './memory-manager.js';
+import { interpretarPedido, salvarPlanejamento, formatarPlanejamentoTexto } from './interpretador.js';
 
 export { LM_STUDIO_URL, LM_STUDIO_BASE, MODEL, WORKSPACE, getHeaders };
 
@@ -267,36 +268,45 @@ export async function agenteLoop(mensagemUsuario, conversationHistory, onToolCal
    const temProjetoEmAndamento = memoryManager.hasProjetoEmAndamento();
    
    if (!temProjetoEmAndamento) {
-      // Novo pedido - gera plano e inicializa slots
+      // Novo pedido - usa interpretador para analisar e dividir em etapas
       conversationHistory.push({ role: 'user', content: mensagemUsuario });
       if (conversationHistory.length > MAX_HISTORY) {
          conversationHistory.splice(0, conversationHistory.length - MAX_HISTORY);
       }
       
       if (onPensando) onPensando('planejando');
-      const planoTexto = await gerarPlano(mensagemUsuario, conversationHistory);
-      const planoParseado = parsePlano(planoTexto);
       
-      if (planoParseado.etapas.length > 0) {
+      // Usa o interpretador para analisar o pedido
+      const planejamento = interpretarPedido(mensagemUsuario);
+      
+      // Salva o planejamento em arquivo JSON para auditoria
+      const resultadoSalvo = salvarPlanejamento(planejamento);
+      
+      // Converte etapas do interpretador para formato do memoryManager
+      const etapasSimples = planejamento.divisao_etapas.etapas.map(e => e.descricao);
+      
+      if (etapasSimples.length > 0) {
          // Inicializa slots com o plano
          memoryManager.iniciarProjeto(
-            planoParseado.projeto || 'Projeto Sem Nome',
-            planoParseado.tipo,
-            planoParseado.etapas
+            planejamento.interpretacao.tipo_identificado,
+            planejamento.interpretacao.tipo_identificado,
+            etapasSimples
          );
          
          // Define arquivos pendentes
-         memoryManager.definirArquivosPendentes(planoParseado.arquivos.map(a => a.caminho));
+         memoryManager.definirArquivosPendentes(planejamento.arquivos_previstos.map(a => a.caminho_sugerido));
          
          // Salva plano na memória
          await executeTool('salvar_memoria', {
             categoria: 'projetos',
-            chave: planoParseado.projeto.toLowerCase().replace(/[^a-z0-9]/g, '_').slice(0, 30),
-            valor: planoTexto.slice(0, 500)
+            chave: `planejamento_${Date.now()}`.slice(0, 30),
+            valor: formatarPlanejamentoTexto(planejamento).slice(0, 500)
          });
          
-         console.log(`\n  Projeto iniciado: ${planoParseado.projeto}`);
-         console.log(`  Total de etapas: ${planoParseado.etapas.length}`);
+         console.log(`\n  ${resultadoSalvo.mensagem}`);
+         console.log(`\n  ${formatarPlanejamentoTexto(planejamento)}`);
+         console.log(`\n  Projeto iniciado: ${planejamento.interpretacao.tipo_identificado}`);
+         console.log(`  Total de etapas: ${planejamento.divisao_etapas.total_etapas}`);
       }
    } else {
       // Projeto em andamento - continua da etapa atual
