@@ -1,19 +1,16 @@
 {
   "ultimo_planejamento": {
     "metadata": {
-      "id": "planejamento_1784839943617",
-      "timestamp_criacao": "2026-07-23T20:52:23.617Z",
+      "id": "planejamento_1784842711169",
+      "timestamp_criacao": "2026-07-23T21:38:31.169Z",
       "versao": "1.0"
     },
-    "pedido_original": "Criar um jogo da cobrinha em python simples na pasta jogos",
+    "pedido_original": "Escrever um conto de terror em D:\\documentos\\stories\\terror",
     "interpretacao": {
-      "tipo_identificado": "programacao",
-      "destino_identificado": "jogos",
-      "preferencias_detectadas": [
-        "simplicidade",
-        "formato_python"
-      ],
-      "resumo": "Pedido do tipo \"programacao\" com destino em \"jogos\""
+      "tipo_identificado": "escrita",
+      "destino_identificado": "D:\\documentos\\stories\\terror",
+      "preferencias_detectadas": [],
+      "resumo": "Pedido do tipo \"escrita\" com destino em \"D:\\documentos\\stories\\terror\""
     },
     "divisao_etapas": {
       "total_etapas": 4,
@@ -30,22 +27,22 @@
         {
           "id": 2,
           "tipo": "criacao",
-          "subtipo": "codigo",
-          "descricao": "Desenvolver o código/programa solicitado",
-          "acao_especifica": "Implementar funcionalidades requeridas",
+          "subtipo": "texto",
+          "descricao": "Criar o conteúdo textual solicitado",
+          "acao_especifica": "Escrever história/texto conforme especificações",
           "criterios_sucesso": [
-            "Código funcional e executável",
-            "Seguir boas práticas da linguagem",
-            "Incluir comentários explicativos"
+            "Possuir início, meio e fim",
+            "Apresentar personagens e contexto",
+            "Seguir preferências de estilo"
           ],
           "obrigatoria": true
         },
         {
           "id": 3,
           "tipo": "salvamento",
-          "descricao": "Salvar resultado no destino: jogos",
-          "acao_especifica": "Criar/editar arquivo em jogos",
-          "destino_sugerido": "jogos",
+          "descricao": "Salvar resultado no destino: D:\\documentos\\stories\\terror",
+          "acao_especifica": "Criar/editar arquivo em D:\\documentos\\stories\\terror",
+          "destino_sugerido": "D:\\documentos\\stories\\terror",
           "criterios_sucesso": [
             "Arquivo salvo corretamente",
             "Local acessível",
@@ -69,8 +66,8 @@
     },
     "arquivos_previstos": [
       {
-        "caminho_sugerido": "jogos.py",
-        "tipo": "programacao",
+        "caminho_sugerido": "D:\\documentos\\stories\\terror.txt",
+        "tipo": "escrita",
         "descricao": "Arquivo principal com o resultado"
       }
     ],
@@ -82,8 +79,253 @@
       "historico": []
     }
   },
-  "total_planejamentos": 8,
+  "total_planejamentos": 11,
   "historico": [
+    {
+      "metadata": {
+        "id": "planejamento_1784842711169",
+        "timestamp_criacao": "2026-07-23T21:38:31.169Z",
+        "versao": "1.0"
+      },
+      "pedido_original": "Escrever um conto de terror em D:\\documentos\\stories\\terror",
+      "interpretacao": {
+        "tipo_identificado": "escrita",
+        "destino_identificado": "D:\\documentos\\stories\\terror",
+        "preferencias_detectadas": [],
+        "resumo": "Pedido do tipo \"escrita\" com destino em \"D:\\documentos\\stories\\terror\""
+      },
+      "divisao_etapas": {
+        "total_etapas": 4,
+        "etapas_obrigatorias": 4,
+        "etapas": [
+          {
+            "id": 1,
+            "tipo": "analise",
+            "descricao": "Analisar e entender o pedido do usuário",
+            "acao_especifica": "Interpretar requisitos e identificar elementos chave",
+            "criterio_sucesso": "Compreensão clara do que deve ser produzido",
+            "obrigatoria": true
+          },
+          {
+            "id": 2,
+            "tipo": "criacao",
+            "subtipo": "texto",
+            "descricao": "Criar o conteúdo textual solicitado",
+            "acao_especifica": "Escrever história/texto conforme especificações",
+            "criterios_sucesso": [
+              "Possuir início, meio e fim",
+              "Apresentar personagens e contexto",
+              "Seguir preferências de estilo"
+            ],
+            "obrigatoria": true
+          },
+          {
+            "id": 3,
+            "tipo": "salvamento",
+            "descricao": "Salvar resultado no destino: D:\\documentos\\stories\\terror",
+            "acao_especifica": "Criar/editar arquivo em D:\\documentos\\stories\\terror",
+            "destino_sugerido": "D:\\documentos\\stories\\terror",
+            "criterios_sucesso": [
+              "Arquivo salvo corretamente",
+              "Local acessível",
+              "Nome descritivo"
+            ],
+            "obrigatoria": true
+          },
+          {
+            "id": 4,
+            "tipo": "validacao",
+            "descricao": "Validar se o resultado atende ao pedido original",
+            "acao_especifica": "Revisar produto final comparando com requisitos",
+            "criterios_sucesso": [
+              "Todos os requisitos atendidos",
+              "Qualidade adequada",
+              "Sem erros óbvios"
+            ],
+            "obrigatoria": true
+          }
+        ]
+      },
+      "arquivos_previstos": [
+        {
+          "caminho_sugerido": "D:\\documentos\\stories\\terror.txt",
+          "tipo": "escrita",
+          "descricao": "Arquivo principal com o resultado"
+        }
+      ],
+      "estimativa_complexidade": "media",
+      "status": "planejado",
+      "execucao": {
+        "etapa_atual": 0,
+        "concluido": false,
+        "historico": []
+      }
+    },
+    {
+      "metadata": {
+        "id": "planejamento_1784842711157",
+        "timestamp_criacao": "2026-07-23T21:38:31.156Z",
+        "versao": "1.0"
+      },
+      "pedido_original": "Criar um jogo da cobrinha em python simples na pasta C:\\meus_jogos",
+      "interpretacao": {
+        "tipo_identificado": "programacao",
+        "destino_identificado": "C:\\meus_jogos",
+        "preferencias_detectadas": [
+          "simplicidade",
+          "formato_python"
+        ],
+        "resumo": "Pedido do tipo \"programacao\" com destino em \"C:\\meus_jogos\""
+      },
+      "divisao_etapas": {
+        "total_etapas": 4,
+        "etapas_obrigatorias": 4,
+        "etapas": [
+          {
+            "id": 1,
+            "tipo": "analise",
+            "descricao": "Analisar e entender o pedido do usuário",
+            "acao_especifica": "Interpretar requisitos e identificar elementos chave",
+            "criterio_sucesso": "Compreensão clara do que deve ser produzido",
+            "obrigatoria": true
+          },
+          {
+            "id": 2,
+            "tipo": "criacao",
+            "subtipo": "codigo",
+            "descricao": "Desenvolver o código/programa solicitado",
+            "acao_especifica": "Implementar funcionalidades requeridas",
+            "criterios_sucesso": [
+              "Código funcional e executável",
+              "Seguir boas práticas da linguagem",
+              "Incluir comentários explicativos"
+            ],
+            "obrigatoria": true
+          },
+          {
+            "id": 3,
+            "tipo": "salvamento",
+            "descricao": "Salvar resultado no destino: C:\\meus_jogos",
+            "acao_especifica": "Criar/editar arquivo em C:\\meus_jogos",
+            "destino_sugerido": "C:\\meus_jogos",
+            "criterios_sucesso": [
+              "Arquivo salvo corretamente",
+              "Local acessível",
+              "Nome descritivo"
+            ],
+            "obrigatoria": true
+          },
+          {
+            "id": 4,
+            "tipo": "validacao",
+            "descricao": "Validar se o resultado atende ao pedido original",
+            "acao_especifica": "Revisar produto final comparando com requisitos",
+            "criterios_sucesso": [
+              "Todos os requisitos atendidos",
+              "Qualidade adequada",
+              "Sem erros óbvios"
+            ],
+            "obrigatoria": true
+          }
+        ]
+      },
+      "arquivos_previstos": [
+        {
+          "caminho_sugerido": "C:\\meus_jogos.py",
+          "tipo": "programacao",
+          "descricao": "Arquivo principal com o resultado"
+        }
+      ],
+      "estimativa_complexidade": "media",
+      "status": "planejado",
+      "execucao": {
+        "etapa_atual": 0,
+        "concluido": false,
+        "historico": []
+      }
+    },
+    {
+      "metadata": {
+        "id": "planejamento_1784842711154",
+        "timestamp_criacao": "2026-07-23T21:38:31.153Z",
+        "versao": "1.0"
+      },
+      "pedido_original": "Criar uma história simples em D:\\ia local\\historias",
+      "interpretacao": {
+        "tipo_identificado": "escrita",
+        "destino_identificado": "D:\\ia local\\historias",
+        "preferencias_detectadas": [
+          "simplicidade"
+        ],
+        "resumo": "Pedido do tipo \"escrita\" com destino em \"D:\\ia local\\historias\""
+      },
+      "divisao_etapas": {
+        "total_etapas": 4,
+        "etapas_obrigatorias": 4,
+        "etapas": [
+          {
+            "id": 1,
+            "tipo": "analise",
+            "descricao": "Analisar e entender o pedido do usuário",
+            "acao_especifica": "Interpretar requisitos e identificar elementos chave",
+            "criterio_sucesso": "Compreensão clara do que deve ser produzido",
+            "obrigatoria": true
+          },
+          {
+            "id": 2,
+            "tipo": "criacao",
+            "subtipo": "texto",
+            "descricao": "Criar o conteúdo textual solicitado",
+            "acao_especifica": "Escrever história/texto conforme especificações",
+            "criterios_sucesso": [
+              "Possuir início, meio e fim",
+              "Apresentar personagens e contexto",
+              "Seguir preferências de estilo"
+            ],
+            "obrigatoria": true
+          },
+          {
+            "id": 3,
+            "tipo": "salvamento",
+            "descricao": "Salvar resultado no destino: D:\\ia local\\historias",
+            "acao_especifica": "Criar/editar arquivo em D:\\ia local\\historias",
+            "destino_sugerido": "D:\\ia local\\historias",
+            "criterios_sucesso": [
+              "Arquivo salvo corretamente",
+              "Local acessível",
+              "Nome descritivo"
+            ],
+            "obrigatoria": true
+          },
+          {
+            "id": 4,
+            "tipo": "validacao",
+            "descricao": "Validar se o resultado atende ao pedido original",
+            "acao_especifica": "Revisar produto final comparando com requisitos",
+            "criterios_sucesso": [
+              "Todos os requisitos atendidos",
+              "Qualidade adequada",
+              "Sem erros óbvios"
+            ],
+            "obrigatoria": true
+          }
+        ]
+      },
+      "arquivos_previstos": [
+        {
+          "caminho_sugerido": "D:\\ia local\\historias.txt",
+          "tipo": "escrita",
+          "descricao": "Arquivo principal com o resultado"
+        }
+      ],
+      "estimativa_complexidade": "media",
+      "status": "planejado",
+      "execucao": {
+        "etapa_atual": 0,
+        "concluido": false,
+        "historico": []
+      }
+    },
     {
       "metadata": {
         "id": "planejamento_1784839943617",
